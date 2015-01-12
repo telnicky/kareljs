@@ -1,3 +1,13 @@
+var level = {
+  walls: "0,0,0,0,0,0,0\n" +
+         "0,0,9,8,12,0,0\n" +
+         "0,0,1,0,0,0,0\n" +
+         "0,0,3,2,6,0,0\n" +
+         "0,0,0,0,0,0,0\n",
+  beepers: [{ x: 5, y: 2, count: 1 }],
+  karel: { x: 2, y: 1 }
+}
+
 // create the canvas
 var canvas = document.createElement("canvas");
 var context = canvas.getContext("2d");
@@ -22,6 +32,97 @@ var drawGrid = function () {
       context.fillRect(x + blockSize * 0.5, y + blockSize * 0.5, 2, 2);
     }
   }
+};
+
+var drawLevel = function (level) {
+  // walls
+  var rows = level.walls.split("\n");
+  for (var y = 0; y < rows.length; y++) {
+    var columns = rows[y].split(",");
+    for (var x = 0; x < columns.length; x++) {
+      drawWall(x, y, columns[x]);
+    }
+  }
+
+  // beepers
+  for (var i = 0; i < level.beepers.length; i++) {
+    var beeper = level.beepers[i];
+    console.log(beeper);
+    drawBeeper(beeper.x, beeper.y, beeper.count);
+  }
+};
+
+var drawBeeper = function (x, y, count) {
+  var minX = x * blockSize;
+  var minY = y * blockSize;
+  var midX = minX + blockSize * 0.5;
+  var midY = minY + blockSize * 0.5;
+  var maxX = minX + blockSize;
+  var maxY = minY + blockSize;
+
+  context.save();
+  context.beginPath();
+  context.moveTo(midX, minY); // top point
+  context.lineTo(maxX, midY); // right point
+  context.lineTo(midX, maxY); // bottom point
+  context.lineTo(minX, midY); // left point
+
+  context.lineWidth = 2;
+  context.fillStyle = "rgb(102, 204, 0)";
+  context.strokeStyle = "rgb(0, 50, 200)";
+
+  context.closePath();
+  context.fill();
+  context.stroke();
+  context.restore();
+
+  if (count && count != 1) {
+    context.save();
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(count, midX, midY);
+    context.restore();
+  }
+};
+
+// Internal: Draw a wall on given side
+// 
+// side - a bitmap representing each side of the wall.
+//        0000 -> Top Right Bottom Left
+//        T = 8, R = 4, B = 2, L = 1
+var drawWall = function (x, y, side) {
+  var minX = x * blockSize;
+  var minY = y * blockSize;
+  var midX = minX + blockSize * 0.5;
+  var midY = minY + blockSize * 0.5;
+  var maxX = minX + blockSize;
+  var maxY = minY + blockSize;
+
+  context.save();
+  context.beginPath();
+
+  if (side & 8) { // Top
+    context.moveTo(minX, minY);
+    context.lineTo(maxX, minY);
+  }
+
+  if (side & 4) { // Right
+    context.moveTo(maxX, minY);
+    context.lineTo(maxX, maxY);
+  }
+
+  if (side & 2) { // Bottom
+    context.moveTo(minX, maxY);
+    context.lineTo(maxX, maxY);
+  }
+
+  if (side & 1) { // Left
+    context.moveTo(minX, minY);
+    context.lineTo(minX, maxY);
+  }
+
+  context.stroke();
+  context.restore();
 };
 
 // Game Objects 
@@ -68,6 +169,7 @@ var update = function (modifier) {
 var render = function () {
   context.clearRect(0, 0, canvas.width, canvas.height);
   drawGrid();
+  drawLevel(level);
   if (karelReady) {
     context.drawImage(karelImage, karel.x * blockSize, karel.y * blockSize, blockSize, blockSize);
   }
