@@ -1,19 +1,6 @@
-var level = {
-  walls: "0,0,0,0,0,0,0\n" +
-         "0,0,9,8,12,0,0\n" +
-         "0,0,1,0,0,0,0\n" +
-         "0,0,3,2,6,0,0\n" +
-         "0,0,0,0,0,0,0\n",
-  beepers: [{ x: 5, y: 2, count: 1 }],
-  karel: { x: 2, y: 1 }
-}
-
 // create the canvas
 var canvas = document.createElement("canvas");
-var context = canvas.getContext("2d");
-var blockSize = 32;
-canvas.width = 512;
-canvas.height = 480;
+var blockSize = 64;
 canvas.className = "karel-container";
 document.body.appendChild(canvas);
 
@@ -26,20 +13,21 @@ karelImage.onload = function () {
 karelImage.src = "images/karel.png";
 
 // Draw the grid
-var drawGrid = function () {
-  for (var x = 0; x <= canvas.width; x += 32) {
-    for (var y = 0; y <= canvas.height; y += 32) {
-      context.fillRect(x + blockSize * 0.5, y + blockSize * 0.5, 2, 2);
-    }
-  }
-};
-
 var drawLevel = function (level) {
+  var context = canvas.getContext("2d");
+  var rows, columns;
+
+  // set width and height
+  rows = level.walls.split("\n");
+  columns = rows[0].split(",");
+  canvas.width = columns.length * blockSize;
+  canvas.height = rows.length * blockSize;
+
   // walls
-  var rows = level.walls.split("\n");
   for (var y = 0; y < rows.length; y++) {
-    var columns = rows[y].split(",");
+    columns = rows[y].split(",");
     for (var x = 0; x < columns.length; x++) {
+      context.fillRect(x * blockSize + blockSize * 0.5, y * blockSize + blockSize * 0.5, 2, 2);
       drawWall(x, y, columns[x]);
     }
   }
@@ -47,7 +35,6 @@ var drawLevel = function (level) {
   // beepers
   for (var i = 0; i < level.beepers.length; i++) {
     var beeper = level.beepers[i];
-    console.log(beeper);
     drawBeeper(beeper.x, beeper.y, beeper.count);
   }
 };
@@ -60,6 +47,7 @@ var drawBeeper = function (x, y, count) {
   var maxX = minX + blockSize;
   var maxY = minY + blockSize;
 
+  var context = canvas.getContext("2d");
   context.save();
   context.beginPath();
   context.moveTo(midX, minY); // top point
@@ -97,6 +85,7 @@ var drawWall = function (x, y, side) {
   var midY = minY + blockSize * 0.5;
   var maxX = minX + blockSize;
   var maxY = minY + blockSize;
+  var context = canvas.getContext("2d");
 
   context.save();
   context.beginPath();
@@ -121,6 +110,7 @@ var drawWall = function (x, y, side) {
     context.lineTo(minX, maxY);
   }
 
+  context.lineWidth = 4;
   context.stroke();
   context.restore();
 };
@@ -132,10 +122,10 @@ var karel = {
   y: 0
 };
 
-// Reset
-var reset = function () {
-  karel.x = 0;
-  karel.y = 0;
+// Setup
+var setup = function (level) {
+  drawLevel(level);
+  karel = level.karel
 };
 
 // handle keyboard controls
@@ -149,26 +139,68 @@ addEventListener("keyup", function (e) {
   delete keysDown[e.keyCode];
 }, false);
 
+var placeBeeper = function(level, x, y) {
+  var beeper;
+  for (var i = 0; i < level.beepers.length; i++) {
+    beeper = level.beepers[i];
+    if (beeper.x === x && beeper.y === y) {
+      beeper.count++;
+      return;
+    }
+  }
+  level.beepers.push({ x: x, y: y, count: 1 });
+}
+
+var pickBeeper = function(level, x, y) {
+  var beeper;
+  for (var i = 0; i < level.beepers.length; i++) {
+    beeper = level.beepers[i];
+    if (beeper.x === x && beeper.y === y) {
+      beeper.count--;
+      if (beeper.count <= 0) {
+        var i = level.beepers.indexOf(beeper);
+        level.beepers.splice(i, 1);
+      }
+      return;
+    }
+  }
+}
+
 // Update the game objects
-var update = function (modifier) {
-  if (38 in keysDown && karel.y > 0) { // up
-    karel.y -= karel.speed * modifier;
+var update = function (level) {
+  // movement
+  if (38 in keysDown && keysDown[38] && karel.y > 0) { // up
+    keysDown[38] = false;
+    karel.y -= 1;
   }
-  if (40 in keysDown && karel.y < (canvas.height / blockSize) - 1) { // down
-    karel.y += karel.speed * modifier;
+  if (40 in keysDown && keysDown[40] && karel.y < (canvas.height / blockSize) - 1) { // down
+    keysDown[40] = false;
+    karel.y += 1;
   }
-  if (37 in keysDown && karel.x > 0) { // left
-    karel.x -= karel.speed * modifier;
+  if (37 in keysDown && keysDown[37] && karel.x > 0) { // left
+    keysDown[37] = false;
+    karel.x -= 1;
   }
-  if (39 in keysDown && karel.x < (canvas.width / blockSize) - 1) { // right
-    karel.x += karel.speed * modifier;
+  if (39 in keysDown && keysDown[39] && karel.x < (canvas.width / blockSize) - 1) { // right
+    keysDown[39] = false;
+    karel.x += 1;
+  }
+
+  // beepers
+  if (13 in keysDown && keysDown[13]) {
+    keysDown[13] = false;
+    placeBeeper(level, karel.x, karel.y);
+  }
+  if (16 in keysDown && keysDown[16]) {
+    keysDown[16] = false;
+    pickBeeper(level, karel.x, karel.y);
   }
 };
 
 // Draw everything
 var render = function () {
+  var context = canvas.getContext("2d");
   context.clearRect(0, 0, canvas.width, canvas.height);
-  drawGrid();
   drawLevel(level);
   if (karelReady) {
     context.drawImage(karelImage, karel.x * blockSize, karel.y * blockSize, blockSize, blockSize);
@@ -183,7 +215,7 @@ var main = function () {
   var now = Date.now();
   var delta = now - then;
 
-  update(delta / 1000);
+  update(level);
   render();
 
   then = now;
@@ -194,5 +226,5 @@ var main = function () {
 
 // Start game
 var then = Date.now();
-reset();
+setup(level);
 main();
