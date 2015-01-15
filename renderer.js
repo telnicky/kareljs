@@ -81,6 +81,10 @@ var Renderer = {
   // side - a bitmap representing each side of the wall.
   //        0000 -> Top Right Bottom Left
   //        T = 8, R = 4, B = 2, L = 1
+  topWall: 8,
+  rightWall: 4,
+  bottomWall: 2,
+  leftWall: 1,
   drawWall: function(x, y, side) {
     var minX = x * this.blockSize;
     var minY = y * this.blockSize;

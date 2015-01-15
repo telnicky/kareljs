@@ -3,6 +3,7 @@ var GameObject = {
     this.renderer = renderer;
     this.level = level;
     this.keysDown = {};
+    this.walls = level.walls.split("\n").map(function(row) { return row.split(","); })
 
     addEventListener("keydown", function (e) {
       this.keysDown[e.keyCode] = true;
@@ -54,25 +55,72 @@ var GameObject = {
     }
   },
 
+  moveLeft: function(karel) {
+    if (karel.x <= 0) {
+      return;
+    }
+
+    var currentWall = parseInt(this.walls[karel.y][karel.x]);
+    var nextWall = parseInt(this.walls[karel.y][karel.x - 1]);
+    if ((currentWall & this.renderer.leftWall) == 0 && (nextWall & this.renderer.rightWall) == 0) {
+      karel.x -= 1;
+    }
+  },
+
+  moveRight: function(karel) {
+    if (karel.x >= (this.renderer.canvas.width / this.renderer.blockSize) - 1) {
+      return;
+    }
+
+    var currentWall = parseInt(this.walls[karel.y][karel.x]);
+    var nextWall = parseInt(this.walls[karel.y][karel.x + 1]);
+    if ((currentWall & this.renderer.rightWall) == 0 && (nextWall & this.renderer.leftWall) == 0) {
+      karel.x += 1;
+    }
+  },
+
+  moveUp: function(karel) {
+    if (karel.y <= 0) {
+      return;
+    }
+    var currentWall = parseInt(this.walls[karel.y][karel.x]);
+    var nextWall = parseInt(this.walls[karel.y - 1][karel.x]);
+    if ((currentWall & this.renderer.topWall) == 0 && (nextWall & this.renderer.bottomWall) == 0) {
+      karel.y -= 1;
+    }
+  },
+
+  moveDown: function(karel) {
+    if (karel.y >= (this.renderer.canvas.height / this.renderer.blockSize) - 1) {
+      return;
+    }
+
+    var currentWall = parseInt(this.walls[karel.y][karel.x]);
+    var nextWall = parseInt(this.walls[karel.y + 1][karel.x]);
+    if ((currentWall & this.renderer.bottomWall) == 0 && (nextWall & this.renderer.topWall) == 0) {
+      karel.y += 1;
+    }
+  },
+
   update: function() {
     var karel = this.level.karel;
 
     // movement
-    if (38 in this.keysDown && this.keysDown[38] && karel.y > 0) { // up
+    if (38 in this.keysDown && this.keysDown[38]) { // up
       this.keysDown[38] = false;
-      karel.y -= 1;
+      this.moveUp(karel);
     }
-    if (40 in this.keysDown && this.keysDown[40] && karel.y < (this.renderer.canvas.height / this.renderer.blockSize) - 1) { // down
+    if (40 in this.keysDown && this.keysDown[40]) { // down
       this.keysDown[40] = false;
-      karel.y += 1;
+      this.moveDown(karel);
     }
-    if (37 in this.keysDown && this.keysDown[37] && karel.x > 0) { // left
+    if (37 in this.keysDown && this.keysDown[37]) { // left
       this.keysDown[37] = false;
-      karel.x -= 1;
+      this.moveLeft(karel);
     }
-    if (39 in this.keysDown && this.keysDown[39] && karel.x < (this.renderer.canvas.width / this.renderer.blockSize) - 1) { // right
+    if (39 in this.keysDown && this.keysDown[39]) { // right
       this.keysDown[39] = false;
-      karel.x += 1;
+      this.moveRight(karel);
     }
 
     // beepers
