@@ -4,15 +4,20 @@ var Renderer = {
 
   initialize: function(level) {
     this.level = level;
-    // create canvas
+    this.createCanvas();
+    this.loadImages();
+  },
+
+  createCanvas: function() {
     this.canvas = document.createElement("canvas");
     this.canvas.className = "karel-container";
-    document.getElementsByClassName("game")[0].appendChild(this.canvas);
+    $('.game').append(this.canvas);
+  },
 
-    // Load Images
+  loadImages: function() {
     this.karelImage = new Image();
     this.karelImage.onload = function () {
-      this.karelReady = true 
+      this.karelReady = true;
     }.bind(this);
     this.karelImage.src = "images/karel.png";
   },
@@ -78,7 +83,7 @@ var Renderer = {
   },
 
   // Internal: Draw a wall on given side
-  // 
+  //
   // side - a bitmap representing each side of the wall.
   //        0000 -> Top Right Bottom Left
   //        T = 8, R = 4, B = 2, L = 1

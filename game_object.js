@@ -1,22 +1,26 @@
 var GameObject = {
-  initialize: function(renderer, level) {
-    this.renderer = renderer;
-    this.level = level;
-    this.keysDown = {};
-    this.walls = level.walls.split("\n").map(function(row) { return row.split(","); });
-    document.getElementsByClassName("run")[0].addEventListener("click", function(e) {
-      var move = function() { };
-      var turnLeft = function() { this.turnLeft(); }.bind(this);
-      var code = editor.doc.getValue();
-      eval(code);
-    }.bind(this));
+  running: false,
+  currentLine: null,
+  lines: null,
 
+  initialize: function(renderer, editor, level) {
+    this.renderer = renderer;
+    this.editor = editor;
+    this.level = level;
+    this.karel = level.karel;
+    this.walls = level.walls.split("\n").map(function(row) { return row.split(","); });
+
+    $('.run').click(this.onRun.bind(this));
     renderer.initialize(level);
     this.main();
+    setInterval(this.update.bind(this), 800);
+  },
+
+  code: function() {
+    return this.editor.doc.getValue();
   },
 
   main: function() {
-    this.update();
     this.renderer.render();
 
     var w = window;
@@ -26,7 +30,7 @@ var GameObject = {
     requestAnimationFrame(this.main.bind(this));
   },
 
-  placeBeeper: function(x, y) {
+  putBeeper: function(x, y) {
     var beeper;
     for (var i = 0; i < this.level.beepers.length; i++) {
       beeper = this.level.beepers[i];
@@ -122,30 +126,36 @@ var GameObject = {
     }
   },
 
+  onRun: function(event) {
+    if (this.running) {
+      this.running = false;
+      return;
+    }
+
+    this.running = true;
+    this.lines = this.code().split('\n');
+    this.currentLine = this.lines.shift();
+  },
+
+  run: function(line) {
+    var move = function() { this.move(this.karel); }.bind(this);
+    var turnLeft = function() { this.turnLeft(); }.bind(this);
+    var putBeeper = function() { this.putBeeper(this.karel.x, this.karel.y); }.bind(this);
+    var pickBeeper = function() { this.pickBeeper(this.karel.x, this.karel.y); }.bind(this);
+
+    eval(line);
+    this.currentLine = this.lines.shift();
+  },
+
   update: function() {
     var karel = this.level.karel;
-
-    // movement
-    if (37 in this.keysDown && this.keysDown[37]) { // left
-      this.keysDown[37] = false;
-      this.turnLeft();
-    }
-    if (39 in this.keysDown && this.keysDown[39]) { // right
-      this.keysDown[39] = false;
-      this.move(karel);
-    }
-
-    // beepers
-    if (13 in this.keysDown && this.keysDown[13]) {
-      this.keysDown[13] = false;
-      this.placeBeeper(karel.x, karel.y);
-    }
-    if (16 in this.keysDown && this.keysDown[16]) {
-      this.keysDown[16] = false;
-      this.pickBeeper(karel.x, karel.y);
+    if (this.running && this.currentLine) {
+      this.run(this.currentLine);
+    } else {
+      this.running = false;
     }
   }
 };
 
-GameObject.initialize(Renderer, level);
+GameObject.initialize(Renderer, Editor, level);
 
