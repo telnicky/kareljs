@@ -3,23 +3,21 @@ var GameObject = {
     this.renderer = renderer;
     this.level = level;
     this.keysDown = {};
-    this.walls = level.walls.split("\n").map(function(row) { return row.split(","); })
+    this.walls = level.walls.split("\n").map(function(row) { return row.split(","); });
+    document.getElementsByClassName("run")[0].addEventListener("click", function(e) {
+      var move = function() { };
+      var turnLeft = function() { this.turnLeft(); }.bind(this);
+      var code = editor.doc.getValue();
+      eval(code);
+    }.bind(this));
 
-    addEventListener("keydown", function (e) {
-      this.keysDown[e.keyCode] = true;
-    }.bind(this)), false;
-
-    addEventListener("keyup", function (e) {
-      delete this.keysDown[e.keyCode];
-    }.bind(this), false);
-
-    renderer.initialize();
+    renderer.initialize(level);
     this.main();
   },
 
   main: function() {
     this.update();
-    this.renderer.render(this.level);
+    this.renderer.render();
 
     var w = window;
     requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
@@ -52,6 +50,28 @@ var GameObject = {
         }
         return;
       }
+    }
+  },
+
+  turnLeft: function() {
+    var karel = this.level.karel;
+    karel.direction = (karel.direction + 1) % 4;
+  },
+
+  move: function(karel) {
+    switch(karel.direction) {
+      case 0: // right
+        this.moveRight(karel);
+        break;
+      case 1: // up
+        this.moveUp(karel);
+        break;
+      case 2: // left
+        this.moveLeft(karel);
+        break;
+      case 3: // down
+        this.moveDown(karel);
+        break;
     }
   },
 
@@ -106,21 +126,13 @@ var GameObject = {
     var karel = this.level.karel;
 
     // movement
-    if (38 in this.keysDown && this.keysDown[38]) { // up
-      this.keysDown[38] = false;
-      this.moveUp(karel);
-    }
-    if (40 in this.keysDown && this.keysDown[40]) { // down
-      this.keysDown[40] = false;
-      this.moveDown(karel);
-    }
     if (37 in this.keysDown && this.keysDown[37]) { // left
       this.keysDown[37] = false;
-      this.moveLeft(karel);
+      this.turnLeft();
     }
     if (39 in this.keysDown && this.keysDown[39]) { // right
       this.keysDown[39] = false;
-      this.moveRight(karel);
+      this.move(karel);
     }
 
     // beepers

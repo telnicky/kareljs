@@ -2,11 +2,12 @@ var Renderer = {
   karelReady: false,
   blockSize: 64,
 
-  initialize: function() {
+  initialize: function(level) {
+    this.level = level;
     // create canvas
     this.canvas = document.createElement("canvas");
     this.canvas.className = "karel-container";
-    document.body.appendChild(this.canvas);
+    document.getElementsByClassName("game")[0].appendChild(this.canvas);
 
     // Load Images
     this.karelImage = new Image();
@@ -16,12 +17,12 @@ var Renderer = {
     this.karelImage.src = "images/karel.png";
   },
 
-  drawLevel: function(level) {
+  drawLevel: function() {
     var context = this.canvas.getContext("2d");
     var rows, columns;
 
     // set width and height
-    rows = level.walls.split("\n");
+    rows = this.level.walls.split("\n");
     columns = rows[0].split(",");
     this.canvas.width = columns.length * this.blockSize;
     this.canvas.height = rows.length * this.blockSize;
@@ -36,8 +37,8 @@ var Renderer = {
     }
 
     // beepers
-    for (var i = 0; i < level.beepers.length; i++) {
-      var beeper = level.beepers[i];
+    for (var i = 0; i < this.level.beepers.length; i++) {
+      var beeper = this.level.beepers[i];
       this.drawBeeper(beeper.x, beeper.y, beeper.count);
     }
   },
@@ -122,13 +123,28 @@ var Renderer = {
     context.restore();
   },
 
-  render: function(level) {
+  drawKarel: function() {
     var context = this.canvas.getContext("2d");
-    var karel = level.karel;
+    var karel = this.level.karel;
+    var minX = karel.x * this.blockSize;
+    var minY = karel.y * this.blockSize;
+    var midX = this.blockSize * 0.5;
+    var midY = this.blockSize * 0.5;
+    context.save();
+    context.translate(minX, minY);
+    context.translate(midX, midY);
+    context.rotate(-90 * karel.direction * (Math.PI / 180));
+    context.drawImage(this.karelImage, midX, midY, -this.blockSize, -this.blockSize);
+    context.restore();
+  },
+
+  render: function() {
+    var context = this.canvas.getContext("2d");
+    var karel = this.level.karel;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.drawLevel(level);
+    this.drawLevel();
     if (this.karelReady) {
-      context.drawImage(this.karelImage, karel.x * this.blockSize, karel.y * this.blockSize, this.blockSize, this.blockSize);
+      this.drawKarel();
     }
   }
 };
