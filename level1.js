@@ -5,6 +5,6 @@ var level = {
          "0,0,3,2,6,0,0\n" +
          "0,0,0,0,0,0,0",
   beepers: [{ x: 5, y: 2, count: 1 }],
-  karel: { speed: 3, x: 2, y: 1, direction: 0 }
+  karel: { x: 2, y: 1, direction: 0 }
 }
 
