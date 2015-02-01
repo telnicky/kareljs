@@ -2,10 +2,12 @@ var Renderer = {
   karelReady: false,
   blockSize: 64,
 
-  initialize: function(level) {
-    this.level = level;
+  initialize: function(world, karel) {
+    this.world = world;
+    this.karel = karel;
     this.createCanvas();
     this.loadImages();
+    return this;
   },
 
   createCanvas: function() {
@@ -24,26 +26,24 @@ var Renderer = {
 
   drawLevel: function() {
     var context = this.canvas.getContext("2d");
-    var rows, columns;
+    var beepers = this.world.beepers;
+    var walls = this.world.walls;
 
     // set width and height
-    rows = this.level.walls.split("\n");
-    columns = rows[0].split(",");
-    this.canvas.width = columns.length * this.blockSize;
-    this.canvas.height = rows.length * this.blockSize;
+    this.canvas.width = walls[0].length * this.blockSize;
+    this.canvas.height = walls.length * this.blockSize;
 
     // walls
-    for (var y = 0; y < rows.length; y++) {
-      columns = rows[y].split(",");
-      for (var x = 0; x < columns.length; x++) {
+    for (var y = 0; y < walls.length; y++) {
+      for (var x = 0; x < walls[y].length; x++) {
         context.fillRect(x * this.blockSize + this.blockSize * 0.5, y * this.blockSize + this.blockSize * 0.5, 2, 2);
-        this.drawWall(x, y, columns[x]);
+        this.drawWall(x, y, walls[y][x]);
       }
     }
 
     // beepers
-    for (var i = 0; i < this.level.beepers.length; i++) {
-      var beeper = this.level.beepers[i];
+    for (var i = 0; i < beepers.length; i++) {
+      var beeper = beepers[i];
       this.drawBeeper(beeper.x, beeper.y, beeper.count);
     }
   },
@@ -130,7 +130,7 @@ var Renderer = {
 
   drawKarel: function() {
     var context = this.canvas.getContext("2d");
-    var karel = this.level.karel;
+    var karel = this.karel;
     var minX = karel.x * this.blockSize;
     var minY = karel.y * this.blockSize;
     var midX = this.blockSize * 0.5;
@@ -145,7 +145,7 @@ var Renderer = {
 
   render: function() {
     var context = this.canvas.getContext("2d");
-    var karel = this.level.karel;
+    var karel = this.karel;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.drawLevel();
     if (this.karelReady) {

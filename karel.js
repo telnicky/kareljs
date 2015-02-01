@@ -1,4 +1,4 @@
-var karel = {
+var Karel = {
   x: 0,
   y: 0,
   direction: 0,
@@ -7,6 +7,7 @@ var karel = {
     this.x = attrs.x || this.x;
     this.y = attrs.y || this.y;
     this.direction = attrs.direction || this.direction;
+    return this;
   },
 
   move: function() {
@@ -26,8 +27,11 @@ var karel = {
     }
   },
 
-  turnLeft: function() {
-    this.direction = (karel.direction + 1) % 4;
+  position: function() {
+    return { x: this.x, y: this.y }
   },
 
+  turnLeft: function() {
+    this.direction = (this.direction + 1) % 4;
+  },
 };

@@ -3,15 +3,14 @@ var GameObject = {
   currentLine: null,
   lines: null,
 
-  initialize: function(renderer, editor, level) {
-    this.renderer = renderer;
-    this.editor = editor;
+  initialize: function(level) {
     this.level = level;
-    this.karel = level.karel;
-    this.walls = level.walls.split("\n").map(function(row) { return row.split(","); });
+    this.editor = Editor;
+    this.karel = Karel.initialize(level.karel);
+    this.world = World.initialize(level.world, Renderer);
+    this.renderer = Renderer.initialize(this.world, this.karel);
 
     $('.run').click(this.onRun.bind(this));
-    renderer.initialize(level);
     this.main();
     setInterval(this.update.bind(this), 800);
   },
@@ -42,17 +41,21 @@ var GameObject = {
   },
 
   run: function(line) {
-    var move = function() { this.move(this.karel); }.bind(this);
-    var turnLeft = function() { this.turnLeft(); }.bind(this);
-    var putBeeper = function() { this.putBeeper(this.karel.x, this.karel.y); }.bind(this);
-    var pickBeeper = function() { this.pickBeeper(this.karel.x, this.karel.y); }.bind(this);
+    var move = function() {
+      if (this.world.canMove(this.karel.direction, this.karel.x, this.karel.y)) {
+        this.karel.move();
+      }
+    }.bind(this);
+
+    var turnLeft = function() { this.karel.turnLeft(); }.bind(this);
+    var putBeeper = function() { this.world.putBeeper(this.karel.x, this.karel.y); }.bind(this);
+    var pickBeeper = function() { this.world.pickBeeper(this.karel.x, this.karel.y); }.bind(this);
 
     eval(line);
     this.currentLine = this.lines.shift();
   },
 
   update: function() {
-    var karel = this.level.karel;
     if (this.running && this.currentLine) {
       this.run(this.currentLine);
     } else {
@@ -61,5 +64,5 @@ var GameObject = {
   }
 };
 
-GameObject.initialize(Renderer, Editor, level);
+GameObject.initialize(level);
 
