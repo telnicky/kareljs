@@ -1,3 +1,5 @@
+// TODO: handle errors in user code
+// TODO: add reset button
 var GameObject = {
   running: false,
   lines: null,
@@ -76,7 +78,6 @@ var GameObject = {
   },
 
   update: function() {
-    console.log(this.updateQueue);
     if (this.running) {
       this.run();
       this.running = false;
@@ -85,7 +86,7 @@ var GameObject = {
     }
 
     if (this.updateQueue.length > 0) {
-      var command = this.updateQueue.pop();
+      var command = this.updateQueue.shift();
       this.commands[command](this);
     }
   }

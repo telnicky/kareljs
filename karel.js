@@ -22,7 +22,7 @@ var Karel = {
         this.x -= 1;
         break;
       case 3: // down
-        karel.y += 1;
+        this.y += 1;
         break;
     }
   },
