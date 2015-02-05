@@ -6,7 +6,7 @@ var Karel = {
   initialize: function(attrs) {
     this.x = attrs.x || this.x;
     this.y = attrs.y || this.y;
-    this.direction = attrs.direction || this.direction;
+    this.direction = attrs.direction || 0;
     return this;
   },
 

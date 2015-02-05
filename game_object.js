@@ -1,11 +1,10 @@
 // TODO: handle errors in user code
-// TODO: add reset button
 var GameObject = {
   running: false,
-  lines: null,
   updateQueue: [],
 
   initialize: function(level) {
+    this.initialLevel = $.extend({}, level);
     this.level = level;
     this.editor = Editor;
     this.karel = Karel.initialize(level.karel);
@@ -13,6 +12,7 @@ var GameObject = {
     this.renderer = Renderer.initialize(this.world, this.karel);
 
     $('.run').click(this.onRun.bind(this));
+    $('.reset').click(this.reset.bind(this));
     this.main();
     setInterval(this.update.bind(this), 800);
   },
@@ -60,12 +60,16 @@ var GameObject = {
     this.running = true;
   },
 
-  parseLines: function(code) {
-    var lines = code.split('\n');
-  },
-
   queueCommand: function(command) {
     this.updateQueue.push(command);
+  },
+
+  reset: function() {
+    this.running = false;
+    this.level = this.initialLevel;
+    this.karel = Karel.initialize(level.karel);
+    this.world = World.initialize(level.world, Renderer);
+    this.updateQueue = [];
   },
 
   run: function() {
