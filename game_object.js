@@ -1,4 +1,7 @@
-// TODO: handle errors in user code
+// TODO: Save State to local storage
+// TODO: Moar levels
+// TODO: Description
+// TODO: Title / styling, disable run button while running, highlight on error
 var GameObject = {
   running: false,
   updateQueue: [],
@@ -78,7 +81,12 @@ var GameObject = {
     var putBeeper = function() { this.queueCommand("putBeeper"); }.bind(this);
     var pickBeeper = function() { this.queueCommand("pickBeeper"); }.bind(this);
 
-    eval(this.code());
+    try {
+      eval(this.code());
+    } catch(err) {
+      console.log(err);
+      this.reset();
+    }
   },
 
   update: function() {
