@@ -34,4 +34,12 @@ var Karel = {
   turnLeft: function() {
     this.direction = (this.direction + 1) % 4;
   },
+
+  attributes: function() {
+    return {
+      direction: this.direction,
+      x: this.x,
+      y: this.y
+    };
+  }
 };

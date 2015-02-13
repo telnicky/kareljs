@@ -6,8 +6,17 @@ var World = {
     this.renderer = renderer;
     this.beepers = attrs.beepers || this.beepers;
     this.walls = attrs.walls || this.walls;
-    this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
+    if (typeof this.walls === "string") {
+      this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
+    }
     return this;
+  },
+
+  attributes: function() {
+    return {
+      beepers: this.beepers,
+      walls: this.walls
+    };
   },
 
   putBeeper: function(x, y) {

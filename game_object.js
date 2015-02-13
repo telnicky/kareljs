@@ -7,15 +7,24 @@ var GameObject = {
   updateQueue: [],
 
   initialize: function(level) {
+    var savedLevel = JSON.parse(localStorage.getItem("karel-level-1"));
     this.initialLevel = $.extend({}, level);
     this.level = level;
     this.editor = Editor;
-    this.karel = Karel.initialize(level.karel);
-    this.world = World.initialize(level.world, Renderer);
-    this.renderer = Renderer.initialize(this.world, this.karel);
+
+    if (savedLevel) {
+      this.karel = Karel.initialize(savedLevel.karel);
+      this.world = World.initialize(savedLevel.world, Renderer);
+      this.setCode(savedLevel.code);
+    } else {
+      this.karel = Karel.initialize(level.karel);
+      this.world = World.initialize(level.world, Renderer);
+    }
+      this.renderer = Renderer.initialize(this.world, this.karel);
 
     $('.run').click(this.onRun.bind(this));
     $('.reset').click(this.reset.bind(this));
+
     this.main();
     setInterval(this.update.bind(this), 800);
   },
@@ -42,6 +51,10 @@ var GameObject = {
 
   code: function() {
     return this.editor.doc.getValue();
+  },
+
+  setCode: function(code) {
+    this.editor.doc.setValue(code);
   },
 
   main: function() {
@@ -89,6 +102,14 @@ var GameObject = {
     }
   },
 
+  save: function() {
+    var value = JSON.stringify({ karel: this.karel.attributes(),
+                                 world: this.world.attributes(),
+                                 code:  this.code()
+    });
+    localStorage.setItem("karel-level-1", value);
+  },
+
   update: function() {
     if (this.running) {
       this.run();
@@ -101,6 +122,8 @@ var GameObject = {
       var command = this.updateQueue.shift();
       this.commands[command](this);
     }
+
+    this.save();
   }
 };
 
