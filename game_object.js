@@ -1,4 +1,4 @@
-// TODO: Save State to local storage
+// TODO: Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
 // TODO: Moar levels
 // TODO: Description
 // TODO: Title / styling, disable run button while running, highlight on error
@@ -30,14 +30,76 @@ var GameObject = {
   },
 
   commands: {
+    // TODO: predicates need to return instantly and actions can be queued. 
+    // One problem is the predicate needs to have the current state of the world to be correct
+    beepersInBag: function(obj) {
+
+    },
+
+    beepersPresent: function(obj) {
+
+    },
+
+    facingEast: function(obj) {
+      return obj.karel.direction === 2;
+    },
+
+    facingNorth: function(obj) {
+      return obj.karel.direction === 1;
+    },
+
+    facingSouth: function(obj) {
+      return obj.karel.direction === 3;
+    },
+
+    facingWest: function(obj) {
+      return obj.karel.direction === 0;
+    },
+
+    frontIsBlocked: function(obj) {
+      return !this.frontIsClear(obj);
+    },
+
+    frontIsClear: function(obj) {
+      return obj.world.canMove(obj.karel.front(), obj.karel.x, obj.karel.y);
+    },
+
+    leftIsBlocked: function(obj) {
+      return !this.leftIsClear(obj);
+    },
+
+    leftIsClear: function(obj) {
+      return obj.world.canMove(obj.karel.left(), obj.karel.x, obj.karel.y);
+    },
+
     move: function(obj) {
       if (obj.world.canMove(obj.karel.direction, obj.karel.x, obj.karel.y)) {
         obj.karel.move();
       }
     },
 
-    turnLeft: function(obj) {
-      obj.karel.turnLeft();
+    noBeepersInBag: function(obj) {
+
+    },
+
+    noBeepersPresent: function(obj) {
+
+    },
+
+    notFacingEast: function(obj) {
+      return !this.facingEast(obj);
+    },
+
+    notFacingNorth: function(obj) {
+      return !this.facingNorth(obj);
+    },
+
+    notFacingSouth: function(obj) {
+      return !this.facingSouth(obj);
+    },
+
+    notFacingWest: function(obj) {
+      return !this.facingWest(obj);
     },
 
     putBeeper: function(obj) {
@@ -46,7 +108,28 @@ var GameObject = {
 
     pickBeeper: function(obj) {
       obj.world.pickBeeper(obj.karel.x, obj.karel.y);
-    }
+    },
+
+    rightIsBlocked: function(obj) {
+      return !this.rightIsClear(obj);
+    },
+
+    rightIsClear: function(obj) {
+      return obj.world.canMove(obj.karel.right(), obj.karel.x, obj.karel.y);
+    },
+
+    turnAround: function(obj) {
+      obj.karel.turnAround();
+    },
+
+    turnLeft: function(obj) {
+      console.log(obj.karel.direction);
+      obj.karel.turnLeft();
+    },
+
+    turnRight: function(obj) {
+      obj.karel.turnRight();
+    },
   },
 
   code: function() {
@@ -89,10 +172,10 @@ var GameObject = {
   },
 
   run: function() {
-    var move = function() { this.queueCommand("move"); }.bind(this);
-    var turnLeft = function() { this.queueCommand("turnLeft"); }.bind(this);
-    var putBeeper = function() { this.queueCommand("putBeeper"); }.bind(this);
-    var pickBeeper = function() { this.queueCommand("pickBeeper"); }.bind(this);
+    var commands = this.karel.commands();
+    for(var i = 0; i < commands.length; i++) {
+      eval('var ' + commands[i] + ' = function() { this.queueCommand("' + commands[i] + '"); }.bind(this);');
+    }
 
     try {
       eval(this.code());
