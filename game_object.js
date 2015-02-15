@@ -33,11 +33,18 @@ var GameObject = {
     // TODO: predicates need to return instantly and actions can be queued. 
     // One problem is the predicate needs to have the current state of the world to be correct
     beepersInBag: function(obj) {
-
+      return !!obj.karel.beeperCount;
     },
 
     beepersPresent: function(obj) {
-
+      var x = obj.karel.x;
+      var y = obj.karel.y;
+      obj.world.beepers.forEach(function(beeper) {
+        if (beeper.x == x && beeper.y == y) {
+          return true;
+        }
+      });
+      return false;
     },
 
     facingEast: function(obj) {
@@ -79,11 +86,11 @@ var GameObject = {
     },
 
     noBeepersInBag: function(obj) {
-
+      return !this.beepersInBag(obj);
     },
 
     noBeepersPresent: function(obj) {
-
+      return !this.beepersPresent(obj);
     },
 
     notFacingEast: function(obj) {
