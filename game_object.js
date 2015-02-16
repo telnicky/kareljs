@@ -7,19 +7,19 @@ var GameObject = {
   currentSnapshot: null,
   snapshots: [],
 
-  initialize: function(level) {
-    var savedLevel = JSON.parse(localStorage.getItem("karel-level-1"));
-    this.initialLevel = $.extend(true, {}, level);
-    this.level = level;
+  initialize: function(levels) {
+    var savedLevel = JSON.parse(localStorage.getItem("karel-level-2"));
+    this.level = levels[1];
     this.editor = Editor;
+    this.initialLevel = $.extend(true, {}, this.level);
 
     if (savedLevel) {
       this.karel = Karel.initialize(savedLevel.karel);
       this.world = World.initialize(savedLevel.world, Renderer);
       this.setCode(savedLevel.code);
     } else {
-      this.karel = Karel.initialize(level.karel);
-      this.world = World.initialize(level.world, Renderer);
+      this.karel = Karel.initialize(this.level.karel);
+      this.world = World.initialize(this.level.world, Renderer);
     }
     this.currentSnapshot = this.takeSnapshot();
     this.renderer = Renderer.initialize();
@@ -213,5 +213,5 @@ var GameObject = {
   }
 };
 
-GameObject.initialize(level);
+GameObject.initialize(levels);
 

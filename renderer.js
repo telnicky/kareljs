@@ -57,10 +57,10 @@ var Renderer = {
     var context = this.canvas.getContext("2d");
     context.save();
     context.beginPath();
-    context.moveTo(midX, minY); // top point
-    context.lineTo(maxX, midY); // right point
-    context.lineTo(midX, maxY); // bottom point
-    context.lineTo(minX, midY); // left point
+    context.moveTo(midX, minY + 10); // top point
+    context.lineTo(maxX - 10, midY); // right point
+    context.lineTo(midX, maxY - 10); // bottom point
+    context.lineTo(minX + 10, midY); // left point
 
     context.lineWidth = 2;
     context.fillStyle = "rgb(102, 204, 0)";
