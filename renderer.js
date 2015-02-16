@@ -2,9 +2,7 @@ var Renderer = {
   karelReady: false,
   blockSize: 64,
 
-  initialize: function(world, karel) {
-    this.world = world;
-    this.karel = karel;
+  initialize: function() {
     this.createCanvas();
     this.loadImages();
     return this;
@@ -24,10 +22,10 @@ var Renderer = {
     this.karelImage.src = "images/karel.png";
   },
 
-  drawLevel: function() {
+  drawLevel: function(world) {
     var context = this.canvas.getContext("2d");
-    var beepers = this.world.beepers;
-    var walls = this.world.walls;
+    var beepers = world.beepers;
+    var walls = world.walls;
 
     // set width and height
     this.canvas.width = walls[0].length * this.blockSize;
@@ -128,9 +126,8 @@ var Renderer = {
     context.restore();
   },
 
-  drawKarel: function() {
+  drawKarel: function(karel) {
     var context = this.canvas.getContext("2d");
-    var karel = this.karel;
     var minX = karel.x * this.blockSize;
     var minY = karel.y * this.blockSize;
     var midX = this.blockSize * 0.5;
@@ -143,13 +140,12 @@ var Renderer = {
     context.restore();
   },
 
-  render: function() {
+  render: function(world, karel) {
     var context = this.canvas.getContext("2d");
-    var karel = this.karel;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.drawLevel();
+    this.drawLevel(world);
     if (this.karelReady) {
-      this.drawKarel();
+      this.drawKarel(karel);
     }
   }
 };

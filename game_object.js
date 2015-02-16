@@ -1,14 +1,15 @@
-// TODO: Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
+// Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
 // TODO: Moar levels
 // TODO: Description
 // TODO: Title / styling, disable run button while running, highlight on error
 var GameObject = {
   running: false,
-  updateQueue: [],
+  currentSnapshot: null,
+  snapshots: [],
 
   initialize: function(level) {
     var savedLevel = JSON.parse(localStorage.getItem("karel-level-1"));
-    this.initialLevel = $.extend({}, level);
+    this.initialLevel = $.extend(true, {}, level);
     this.level = level;
     this.editor = Editor;
 
@@ -20,9 +21,10 @@ var GameObject = {
       this.karel = Karel.initialize(level.karel);
       this.world = World.initialize(level.world, Renderer);
     }
-      this.renderer = Renderer.initialize(this.world, this.karel);
+    this.currentSnapshot = this.takeSnapshot();
+    this.renderer = Renderer.initialize();
 
-    $('.run').click(this.onRun.bind(this));
+    $('.run').click(this.run.bind(this));
     $('.reset').click(this.reset.bind(this));
 
     this.main();
@@ -30,8 +32,6 @@ var GameObject = {
   },
 
   commands: {
-    // TODO: predicates need to return instantly and actions can be queued. 
-    // One problem is the predicate needs to have the current state of the world to be correct
     beepersInBag: function(obj) {
       return !!obj.karel.beeperCount;
     },
@@ -39,12 +39,13 @@ var GameObject = {
     beepersPresent: function(obj) {
       var x = obj.karel.x;
       var y = obj.karel.y;
+      var result = false;
       obj.world.beepers.forEach(function(beeper) {
-        if (beeper.x == x && beeper.y == y) {
-          return true;
+        if (beeper.x === x && beeper.y === y) {
+          result = true;
         }
       });
-      return false;
+      return result;
     },
 
     facingEast: function(obj) {
@@ -130,7 +131,6 @@ var GameObject = {
     },
 
     turnLeft: function(obj) {
-      console.log(obj.karel.direction);
       obj.karel.turnLeft();
     },
 
@@ -148,7 +148,10 @@ var GameObject = {
   },
 
   main: function() {
-    this.renderer.render();
+    var snapshot = this.currentSnapshot;
+    if (snapshot) {
+      this.renderer.render(snapshot.world, snapshot.karel);
+    }
 
     var w = window;
     requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
@@ -157,31 +160,28 @@ var GameObject = {
     requestAnimationFrame(this.main.bind(this));
   },
 
-  onRun: function(event) {
-    if (this.running) {
-      this.running = false;
-      return;
-    }
-
-    this.running = true;
-  },
-
-  queueCommand: function(command) {
-    this.updateQueue.push(command);
-  },
-
   reset: function() {
     this.running = false;
     this.level = this.initialLevel;
-    this.karel = Karel.initialize(level.karel);
-    this.world = World.initialize(level.world, Renderer);
-    this.updateQueue = [];
+    this.karel = Karel.initialize(this.level.karel);
+    this.world = World.initialize(this.level.world, Renderer);
+    this.currentSnapshot = this.takeSnapshot();
+    this.snapshots = [];
+  },
+
+  runCommand: function(command) {
+    var result = this.commands[command](this);
+    if (result === undefined) {
+      // likely something changed because it is not a predicate function
+      this.snapshots.push(this.takeSnapshot());
+    }
+    return result;
   },
 
   run: function() {
     var commands = this.karel.commands();
     for(var i = 0; i < commands.length; i++) {
-      eval('var ' + commands[i] + ' = function() { this.queueCommand("' + commands[i] + '"); }.bind(this);');
+      eval('var ' + commands[i] + ' = function() { return this.runCommand("' + commands[i] + '"); }.bind(this);');
     }
 
     try {
@@ -200,19 +200,15 @@ var GameObject = {
     localStorage.setItem("karel-level-1", value);
   },
 
+  takeSnapshot: function() {
+    return { world: $.extend(true, {}, this.world),
+             karel: $.extend(true, {}, this.karel) };
+  },
+
   update: function() {
-    if (this.running) {
-      this.run();
-      this.running = false;
-    } else {
-      this.running = false;
+    if (this.snapshots.length > 0) {
+      this.currentSnapshot = this.snapshots.shift();
     }
-
-    if (this.updateQueue.length > 0) {
-      var command = this.updateQueue.shift();
-      this.commands[command](this);
-    }
-
     this.save();
   }
 };

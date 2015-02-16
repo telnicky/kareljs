@@ -9,7 +9,13 @@ var Karel = {
     this.x = attrs.x || this.x;
     this.y = attrs.y || this.y;
     this.isSuper = attrs.isSuper || this.isSuper;
-    this.direction = attrs.direction || this.direction;
+
+    if (attrs.direction === 0) {
+      this.direction = 0;
+    } else {
+      this.direction = attrs.direction || this.direction;
+    }
+
     if (attrs.beepersCount === 0) {
       this.beeperCount = 0;
     } else {
