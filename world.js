@@ -1,10 +1,12 @@
 var World = {
   beepers: [],
+  solution: [],
   walls: "",
 
   initialize: function(attrs, renderer) {
     this.renderer = renderer;
     this.beepers = attrs.beepers || this.beepers;
+    this.solution = attrs.solution || this.solution;
     this.walls = attrs.walls || this.walls;
     if (typeof this.walls === "string") {
       this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
@@ -15,6 +17,7 @@ var World = {
   attributes: function() {
     return {
       beepers: this.beepers,
+      solution: this.solution,
       walls: this.walls
     };
   },

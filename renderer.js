@@ -22,10 +22,10 @@ var Renderer = {
     this.karelImage.src = "images/karel.png";
   },
 
-  drawLevel: function(world) {
+  drawLevel: function(world, solution) {
     var context = this.canvas.getContext("2d");
-    var beepers = world.beepers;
     var walls = world.walls;
+    var beepers = (solution) ? world.solution : world.beepers;
 
     // set width and height
     var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) * 0.66;
@@ -150,6 +150,12 @@ var Renderer = {
     if (this.karelReady) {
       this.drawKarel(karel);
     }
+  },
+
+  solution: function(world) {
+    var context = this.canvas.getContext("2d");
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.drawLevel(world, true);
   }
 };
 
