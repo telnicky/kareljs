@@ -28,8 +28,11 @@ var Renderer = {
     var walls = world.walls;
 
     // set width and height
-    this.canvas.width = walls[0].length * this.blockSize;
+    var width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) * 0.66;
+    this.blockSize = width / walls[0].length;
+    this.canvas.width = width;
     this.canvas.height = walls.length * this.blockSize;
+    $(".container").height(this.canvas.height);
 
     // walls
     for (var y = 0; y < walls.length; y++) {
