@@ -1,11 +1,11 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
-// TODO: display solution
+// TODO: Check solution -- when run is complete check for solution and reset
 // TODO: Moar levels
 // TODO: Description of commands
 // TODO: prevent normal karel from running super karel comands
 // TODO: Title / styling, disable run button while running, highlight on error
+// TODO: frd caching of code
 var GameObject = {
-  running: false,
   currentSnapshot: null,
   snapshots: [],
 
@@ -15,7 +15,7 @@ var GameObject = {
     this.editor = Editor;
     this.initialLevel = $.extend(true, {}, this.level);
 
-    if (false) {//savedLevel) {
+    if (savedLevel) {
       this.karel = Karel.initialize(savedLevel.karel);
       this.world = World.initialize(savedLevel.world, Renderer);
       this.setCode(savedLevel.code);
@@ -167,12 +167,12 @@ var GameObject = {
   },
 
   reset: function() {
-    this.running = false;
     this.level = this.initialLevel;
     this.karel = Karel.initialize(this.level.karel);
     this.world = World.initialize(this.level.world, Renderer);
     this.currentSnapshot = this.takeSnapshot();
     this.snapshots = [];
+    console.log(this.initialLevel);
   },
 
   runCommand: function(command) {

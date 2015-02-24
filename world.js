@@ -5,9 +5,10 @@ var World = {
 
   initialize: function(attrs, renderer) {
     this.renderer = renderer;
-    this.beepers = attrs.beepers || this.beepers;
-    this.solution = attrs.solution || this.solution;
-    this.walls = attrs.walls || this.walls;
+    this.beepers = attrs.beepers;
+    this.solution = attrs.solution;
+    this.walls = attrs.walls;
+
     if (typeof this.walls === "string") {
       this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
     }
