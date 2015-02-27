@@ -12,6 +12,7 @@ var World = {
     if (typeof this.walls === "string") {
       this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
     }
+
     return this;
   },
 

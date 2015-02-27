@@ -1,13 +1,12 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
-// TODO: Check solution -- when run is complete check for solution and reset
 // TODO: Moar levels
 // TODO: Description of commands
-// TODO: prevent normal karel from running super karel comands
 // TODO: Title / styling, disable run button while running, highlight on error
 // TODO: frd caching of code
 var GameObject = {
   currentSnapshot: null,
   snapshots: [],
+  stateChanged: false,
 
   initialize: function(levels) {
     var savedLevel = JSON.parse(localStorage.getItem("karel-level-2"));
@@ -32,6 +31,32 @@ var GameObject = {
 
     this.main();
     setInterval(this.update.bind(this), 800);
+  },
+
+  checkSolution: function() {
+    var beepers = this.world.beepers;
+    var solution = this.world.solution;
+    var compare = function(a, b) {
+      return a.x === b.x && a.y === b.y && a.count === b.count;
+    };
+
+    if (beepers.length !== solution.length) {
+      return false;
+    }
+
+    for(var i = 0; i < beepers.length; i++) {
+      for(var j = 0; j < solution.length; j++) {
+        if (!compare(beepers[i], solution[j])) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  },
+
+  completed: function() {
+    $(".run").html("completed!");
   },
 
   commands: {
@@ -167,12 +192,12 @@ var GameObject = {
   },
 
   reset: function() {
-    this.level = this.initialLevel;
+    this.level = $.extend(true, {}, this.initialLevel);
     this.karel = Karel.initialize(this.level.karel);
     this.world = World.initialize(this.level.world, Renderer);
     this.currentSnapshot = this.takeSnapshot();
     this.snapshots = [];
-    console.log(this.initialLevel);
+    $(".run").html("run");
   },
 
   runCommand: function(command) {
@@ -218,6 +243,14 @@ var GameObject = {
   update: function() {
     if (this.snapshots.length > 0) {
       this.currentSnapshot = this.snapshots.shift();
+      this.stateChanged = true;
+    } else if(this.stateChanged) {
+      this.stateChanged = false;
+      if (this.checkSolution()) {
+        this.completed();
+      } else {
+        this.reset();
+      }
     }
     this.save();
   }
