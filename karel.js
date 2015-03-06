@@ -6,13 +6,14 @@ var Karel = {
   beeperCount: Infinity,
 
   initialize: function(attrs) {
-    this.x = attrs.x;
-    this.y = attrs.y;
-    this.isSuper = !!attrs.isSuper;
-    this.direction = attrs.direction;
-    this.beeperCount = attrs.beeperCount;
+    var karel = $.extend(true, {}, this);
+    karel.x = attrs.x;
+    karel.y = attrs.y;
+    karel.isSuper = !!attrs.isSuper;
+    karel.direction = attrs.direction;
+    karel.beeperCount = attrs.beeperCount;
 
-    return this;
+    return karel;
   },
 
   front: function() {

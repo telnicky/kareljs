@@ -4,17 +4,18 @@ var World = {
   walls: "",
 
   initialize: function(attrs, renderer) {
-    this.renderer = renderer;
-    this.beepers = attrs.beepers;
-    this.solution = attrs.solution;
-    this.walls = attrs.walls;
-    this.karel = Karel.initialize(attrs.karel);
+    var world = $.extend(true, {}, this);
+    world.renderer = renderer;
+    world.beepers = attrs.beepers;
+    world.solution = attrs.solution;
+    world.walls = attrs.walls;
+    world.karel = Karel.initialize(attrs.karel);
 
-    if (typeof this.walls === "string") {
-      this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
+    if (typeof world.walls === "string") {
+      world.walls = world.walls.split("\n").map(function(row) { return row.split(","); });
     }
 
-    return this;
+    return world;
   },
 
   attributes: function() {

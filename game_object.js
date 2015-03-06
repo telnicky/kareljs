@@ -1,5 +1,7 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
 // TODO: Moar levels
+// TODO: Level Selector
+// TODO: more obvious win state
 // TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
 // TODO: Highlight on undefined function
@@ -10,19 +12,19 @@ var GameObject = {
   stateChanged: false,
 
   initialize: function(levels) {
-    var savedLevel = JSON.parse(localStorage.getItem("karel-level-2"));
+    var savedLevel = JSON.parse(localStorage.getItem("karel-level-1"));
     this.level = levels[0];
     this.editor = Editor;
     this.initialLevel = $.extend(true, {}, this.level);
+    this.renderer = Renderer.initialize();
 
     if (savedLevel) {
-      this.world = World.initialize(savedLevel.world, Renderer);
+      this.world = World.initialize(savedLevel.world, this.renderer);
       this.setCode(savedLevel.code);
     } else {
-      this.world = World.initialize(this.level.world, Renderer);
+      this.world = World.initialize(this.level.world, this.renderer);
     }
     this.currentSnapshot = this.takeSnapshot();
-    this.renderer = Renderer.initialize();
 
     $('.run').click(this.run.bind(this));
     $('.reset').click(this.reset.bind(this));

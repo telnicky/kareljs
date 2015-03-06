@@ -3,9 +3,10 @@ var Renderer = {
   blockSize: 64,
 
   initialize: function() {
-    this.createCanvas();
-    this.loadImages();
-    return this;
+    var instance = $.extend(true, {}, this);
+    instance.createCanvas();
+    instance.loadImages();
+    return instance;
   },
 
   createCanvas: function() {
