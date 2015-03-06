@@ -2,6 +2,7 @@
 // TODO: Moar levels
 // TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
+// TODO: Highlight on undefined function
 // TODO: frd caching of code
 var GameObject = {
   currentSnapshot: null,
@@ -10,16 +11,14 @@ var GameObject = {
 
   initialize: function(levels) {
     var savedLevel = JSON.parse(localStorage.getItem("karel-level-2"));
-    this.level = levels[1];
+    this.level = levels[0];
     this.editor = Editor;
     this.initialLevel = $.extend(true, {}, this.level);
 
     if (savedLevel) {
-      this.karel = Karel.initialize(savedLevel.karel);
       this.world = World.initialize(savedLevel.world, Renderer);
       this.setCode(savedLevel.code);
     } else {
-      this.karel = Karel.initialize(this.level.karel);
       this.world = World.initialize(this.level.world, Renderer);
     }
     this.currentSnapshot = this.takeSnapshot();
@@ -60,15 +59,15 @@ var GameObject = {
   },
 
   commands: {
-    beepersInBag: function(obj) {
-      return !!obj.karel.beeperCount;
+    beepersInBag: function(world) {
+      return !!world.karel.beeperCount;
     },
 
-    beepersPresent: function(obj) {
-      var x = obj.karel.x;
-      var y = obj.karel.y;
+    beepersPresent: function(world) {
+      var x = world.karel.x;
+      var y = world.karel.y;
       var result = false;
-      obj.world.beepers.forEach(function(beeper) {
+      world.beepers.forEach(function(beeper) {
         if (beeper.x === x && beeper.y === y) {
           result = true;
         }
@@ -76,94 +75,94 @@ var GameObject = {
       return result;
     },
 
-    facingEast: function(obj) {
-      return obj.karel.direction === 2;
+    facingEast: function(world) {
+      return world.karel.direction === 2;
     },
 
-    facingNorth: function(obj) {
-      return obj.karel.direction === 1;
+    facingNorth: function(world) {
+      return world.karel.direction === 1;
     },
 
-    facingSouth: function(obj) {
-      return obj.karel.direction === 3;
+    facingSouth: function(world) {
+      return world.karel.direction === 3;
     },
 
-    facingWest: function(obj) {
-      return obj.karel.direction === 0;
+    facingWest: function(world) {
+      return world.karel.direction === 0;
     },
 
-    frontIsBlocked: function(obj) {
-      return !this.frontIsClear(obj);
+    frontIsBlocked: function(world) {
+      return !this.frontIsClear(world);
     },
 
-    frontIsClear: function(obj) {
-      return obj.world.canMove(obj.karel.front(), obj.karel.x, obj.karel.y);
+    frontIsClear: function(world) {
+      return world.canMove(world.karel.front(), world.karel.x, world.karel.y);
     },
 
-    leftIsBlocked: function(obj) {
-      return !this.leftIsClear(obj);
+    leftIsBlocked: function(world) {
+      return !this.leftIsClear(world);
     },
 
-    leftIsClear: function(obj) {
-      return obj.world.canMove(obj.karel.left(), obj.karel.x, obj.karel.y);
+    leftIsClear: function(world) {
+      return world.canMove(world.karel.left(), world.karel.x, world.karel.y);
     },
 
-    move: function(obj) {
-      if (obj.world.canMove(obj.karel.direction, obj.karel.x, obj.karel.y)) {
-        obj.karel.move();
+    move: function(world) {
+      if (world.canMove(world.karel.direction, world.karel.x, world.karel.y)) {
+        world.karel.move();
       }
     },
 
-    noBeepersInBag: function(obj) {
-      return !this.beepersInBag(obj);
+    noBeepersInBag: function(world) {
+      return !this.beepersInBag(world);
     },
 
-    noBeepersPresent: function(obj) {
-      return !this.beepersPresent(obj);
+    noBeepersPresent: function(world) {
+      return !this.beepersPresent(world);
     },
 
-    notFacingEast: function(obj) {
-      return !this.facingEast(obj);
+    notFacingEast: function(world) {
+      return !this.facingEast(world);
     },
 
-    notFacingNorth: function(obj) {
-      return !this.facingNorth(obj);
+    notFacingNorth: function(world) {
+      return !this.facingNorth(world);
     },
 
-    notFacingSouth: function(obj) {
-      return !this.facingSouth(obj);
+    notFacingSouth: function(world) {
+      return !this.facingSouth(world);
     },
 
-    notFacingWest: function(obj) {
-      return !this.facingWest(obj);
+    notFacingWest: function(world) {
+      return !this.facingWest(world);
     },
 
-    putBeeper: function(obj) {
-      obj.world.putBeeper(obj.karel.x, obj.karel.y);
+    putBeeper: function(world) {
+      world.putBeeper(world.karel.x, world.karel.y);
     },
 
-    pickBeeper: function(obj) {
-      obj.world.pickBeeper(obj.karel.x, obj.karel.y);
+    pickBeeper: function(world) {
+      world.pickBeeper(world.karel.x, world.karel.y);
     },
 
-    rightIsBlocked: function(obj) {
-      return !this.rightIsClear(obj);
+    rightIsBlocked: function(world) {
+      return !this.rightIsClear(world);
     },
 
-    rightIsClear: function(obj) {
-      return obj.world.canMove(obj.karel.right(), obj.karel.x, obj.karel.y);
+    rightIsClear: function(world) {
+      return world.canMove(world.karel.right(), world.karel.x, world.karel.y);
     },
 
-    turnAround: function(obj) {
-      obj.karel.turnAround();
+    turnAround: function(world) {
+      world.karel.turnAround();
     },
 
-    turnLeft: function(obj) {
-      obj.karel.turnLeft();
+    turnLeft: function(world) {
+      world.karel.turnLeft();
     },
 
-    turnRight: function(obj) {
-      obj.karel.turnRight();
+    turnRight: function(world) {
+      world.karel.turnRight();
     },
   },
 
@@ -181,7 +180,7 @@ var GameObject = {
     if (showSolution) {
       this.renderer.solution(snapshot.world);
     } else if (snapshot) {
-      this.renderer.render(snapshot.world, snapshot.karel);
+      this.renderer.render(snapshot.world, snapshot.world.karel); //TODO
     }
 
     var w = window;
@@ -193,7 +192,6 @@ var GameObject = {
 
   reset: function() {
     this.level = $.extend(true, {}, this.initialLevel);
-    this.karel = Karel.initialize(this.level.karel);
     this.world = World.initialize(this.level.world, Renderer);
     this.currentSnapshot = this.takeSnapshot();
     this.snapshots = [];
@@ -201,7 +199,7 @@ var GameObject = {
   },
 
   runCommand: function(command) {
-    var result = this.commands[command](this);
+    var result = this.commands[command](this.world);
     if (result === undefined) {
       // likely something changed because it is not a predicate function
       this.snapshots.push(this.takeSnapshot());
@@ -210,7 +208,7 @@ var GameObject = {
   },
 
   run: function() {
-    var commands = this.karel.commands();
+    var commands = this.world.karel.commands();
     for(var i = 0; i < commands.length; i++) {
       eval('var ' + commands[i] + ' = function() { return this.runCommand("' + commands[i] + '"); }.bind(this);');
     }
@@ -224,8 +222,7 @@ var GameObject = {
   },
 
   save: function() {
-    var value = JSON.stringify({ karel: this.karel.attributes(),
-                                 world: this.world.attributes(),
+    var value = JSON.stringify({ world: this.world.attributes(),
                                  code:  this.code()
     });
     localStorage.setItem("karel-level-1", value);
@@ -236,8 +233,7 @@ var GameObject = {
   },
 
   takeSnapshot: function() {
-    return { world: $.extend(true, {}, this.world),
-             karel: $.extend(true, {}, this.karel) };
+    return { world: $.extend(true, {}, this.world) };
   },
 
   update: function() {

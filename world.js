@@ -8,6 +8,7 @@ var World = {
     this.beepers = attrs.beepers;
     this.solution = attrs.solution;
     this.walls = attrs.walls;
+    this.karel = Karel.initialize(attrs.karel);
 
     if (typeof this.walls === "string") {
       this.walls = this.walls.split("\n").map(function(row) { return row.split(","); });
@@ -19,8 +20,9 @@ var World = {
   attributes: function() {
     return {
       beepers: this.beepers,
+      karel: this.karel.attributes(),
       solution: this.solution,
-      walls: this.walls
+      walls: this.walls,
     };
   },
 

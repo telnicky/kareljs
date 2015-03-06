@@ -32,7 +32,7 @@ var Renderer = {
     this.blockSize = width / walls[0].length;
     this.canvas.width = width;
     this.canvas.height = walls.length * this.blockSize;
-    $(".container").height(this.canvas.height);
+    $(".container").height(this.canvas.height + 1); // 1px for border
 
     // walls
     for (var y = 0; y < walls.length; y++) {

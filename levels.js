@@ -6,9 +6,9 @@ var levels = [{
            "0,0,3,2,6,0,0\n" +
            "0,0,0,0,0,0,0",
     beepers: [{ x: 5, y: 2, count: 1 }],
-    solution: [{ x : 2, y: 1, count: 1 }]
+    solution: [{ x : 2, y: 1, count: 1 }],
+    karel: { x: 2, y: 1, direction: 0, isSuper: false }
   },
-  karel: { x: 2, y: 1, direction: 0, isSuper: false }
 },
 {
   world: {
