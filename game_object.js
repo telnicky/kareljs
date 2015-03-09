@@ -7,23 +7,34 @@
 // TODO: Highlight on undefined function
 // TODO: frd caching of code
 var GameObject = {
-  currentSnapshot: null,
+  currentSnapshot: [],
+  renderers: [],
   snapshots: [],
   stateChanged: false,
+  worlds: [],
 
   initialize: function(levels) {
-    var savedLevel = JSON.parse(localStorage.getItem("karel-level-1"));
+    var savedLevel = JSON.parse(localStorage.getItem("asdf"));
+    this.levels = levels;
     this.level = levels[0];
     this.editor = Editor;
-    this.initialLevel = $.extend(true, {}, this.level);
-    this.renderer = Renderer.initialize();
+    this.buildLevelSelect();
 
-    if (savedLevel) {
-      this.world = World.initialize(savedLevel.world, this.renderer);
+    if (false) { //savedLevel) {
       this.setCode(savedLevel.code);
+      for(var i = 0; i < this.level.worlds.length; i++) {
+        var renderer = Renderer.initialize();
+        this.renderers.push(renderer);
+        this.worlds.push(World.initialize(savedLevel.world, renderer));
+      }
     } else {
-      this.world = World.initialize(this.level.world, this.renderer);
+      for(var i = 0; i < this.level.worlds.length; i++) {
+        var renderer = Renderer.initialize();
+        this.renderers.push(renderer);
+        this.worlds.push(World.initialize(this.level.worlds[i], renderer));
+      }
     }
+
     this.currentSnapshot = this.takeSnapshot();
 
     $('.run').click(this.run.bind(this));
@@ -34,21 +45,34 @@ var GameObject = {
     setInterval(this.update.bind(this), 800);
   },
 
-  checkSolution: function() {
-    var beepers = this.world.beepers;
-    var solution = this.world.solution;
-    var compare = function(a, b) {
-      return a.x === b.x && a.y === b.y && a.count === b.count;
-    };
-
-    if (beepers.length !== solution.length) {
-      return false;
+  buildLevelSelect: function() {
+    var select = $('.level-select');
+    for(var i = 0; i < this.levels.length; i++) {
+      select.append($("<option></option>")
+        .attr("value", i)
+        .text(this.levels[i].name));
     }
+    select.change(this.setLevel.bind(this));
+  },
 
-    for(var i = 0; i < beepers.length; i++) {
-      for(var j = 0; j < solution.length; j++) {
-        if (!compare(beepers[i], solution[j])) {
-          return false;
+  checkSolution: function() {
+    for(var i = 0; i < this.worlds.length; i++) {
+      var world = this.worlds[i];
+      var beepers = world.beepers;
+      var solution = world.solution;
+      var compare = function(a, b) {
+        return a.x === b.x && a.y === b.y && a.count === b.count;
+      };
+
+      if (beepers.length !== solution.length) {
+        return false;
+      }
+
+      for(var i = 0; i < beepers.length; i++) {
+        for(var j = 0; j < solution.length; j++) {
+          if (!compare(beepers[i], solution[j])) {
+            return false;
+          }
         }
       }
     }
@@ -180,9 +204,15 @@ var GameObject = {
     var snapshot = this.currentSnapshot;
     var showSolution = $(".solution").hasClass("active");
     if (showSolution) {
-      this.renderer.solution(snapshot.world);
+      for(var i = 0; i < this.renderers.length; i++) {
+        var renderer = this.renderers[i];
+        renderer.solution(snapshot[i].world); // TODO: multi worlds
+      }
     } else if (snapshot) {
-      this.renderer.render(snapshot.world, snapshot.world.karel); //TODO
+      for(var i = 0; i < this.renderers.length; i++) {
+        var renderer = this.renderers[i];
+        renderer.render(snapshot[i].world, snapshot[i].world.karel);
+      }
     }
 
     var w = window;
@@ -193,24 +223,30 @@ var GameObject = {
   },
 
   reset: function() {
-    this.level = $.extend(true, {}, this.initialLevel);
-    this.world = World.initialize(this.level.world, Renderer);
+    this.worlds = [];
+    for(var i = 0; i < this.level.worlds.length; i++) {
+      this.worlds.push(World.initialize(this.level.worlds[i], this.renderers[i]));
+    }
     this.currentSnapshot = this.takeSnapshot();
     this.snapshots = [];
     $(".run").html("run");
   },
 
   runCommand: function(command) {
-    var result = this.commands[command](this.world);
+    for(var i = 0; i < this.worlds.length; i++) {
+      var result = this.commands[command](this.worlds[i]);
+    }
+
     if (result === undefined) {
       // likely something changed because it is not a predicate function
       this.snapshots.push(this.takeSnapshot());
     }
+
     return result;
   },
 
   run: function() {
-    var commands = this.world.karel.commands();
+    var commands = this.worlds[0].karel.commands();
     for(var i = 0; i < commands.length; i++) {
       eval('var ' + commands[i] + ' = function() { return this.runCommand("' + commands[i] + '"); }.bind(this);');
     }
@@ -224,18 +260,26 @@ var GameObject = {
   },
 
   save: function() {
-    var value = JSON.stringify({ world: this.world.attributes(),
+    var value = JSON.stringify({ worlds: this.worlds.map(function(world) { return world.attributes(); }.bind(this)),
                                  code:  this.code()
     });
     localStorage.setItem("karel-level-1", value);
+  },
+
+  setLevel: function() {
+    var index = Number($(".level-select").val());
+    this.level = this.levels[index];
+    this.reset();
   },
 
   solution: function() {
     $(".solution").toggleClass("active");
   },
 
-  takeSnapshot: function() {
-    return { world: $.extend(true, {}, this.world) };
+  takeSnapshot: function(index) {
+    return this.worlds.map(function(world) {
+      return { world: $.extend(true, {}, world) };
+    });
   },
 
   update: function() {
@@ -250,6 +294,7 @@ var GameObject = {
         this.reset();
       }
     }
+
     this.save();
   }
 };
