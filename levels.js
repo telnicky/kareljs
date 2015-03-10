@@ -1,4 +1,5 @@
 var levels = [{
+  code: "",
   name: "morning newspaper",
   worlds: [
     {
@@ -14,6 +15,7 @@ var levels = [{
   ],
 },
 {
+  code: "",
   name: "broken pillars",
   worlds: [{
     walls: "0,0,2,0,0,0,2,0,0,0,2,0,0\n" +

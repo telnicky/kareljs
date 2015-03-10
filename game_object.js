@@ -1,41 +1,21 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
-// TODO: Moar levels
-// TODO: Level Selector
+// TODO: frd caching of code
 // TODO: more obvious win state
 // TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
 // TODO: Highlight on undefined function
-// TODO: frd caching of code
 var GameObject = {
   currentSnapshot: [],
   renderers: [],
   snapshots: [],
   stateChanged: false,
   worlds: [],
+  levelIndex: 0,
 
   initialize: function(levels) {
-    var savedLevel = JSON.parse(localStorage.getItem("asdf"));
-    this.levels = levels;
-    this.level = levels[0];
     this.editor = Editor;
+    this.initLevels(levels);
     this.buildLevelSelect();
-
-    if (false) { //savedLevel) {
-      this.setCode(savedLevel.code);
-      for(var i = 0; i < this.level.worlds.length; i++) {
-        var renderer = Renderer.initialize();
-        this.renderers.push(renderer);
-        this.worlds.push(World.initialize(savedLevel.world, renderer));
-      }
-    } else {
-      for(var i = 0; i < this.level.worlds.length; i++) {
-        var renderer = Renderer.initialize();
-        this.renderers.push(renderer);
-        this.worlds.push(World.initialize(this.level.worlds[i], renderer));
-      }
-    }
-
-    this.currentSnapshot = this.takeSnapshot();
 
     $('.run').click(this.run.bind(this));
     $('.reset').click(this.reset.bind(this));
@@ -84,114 +64,6 @@ var GameObject = {
     $(".run").html("completed!");
   },
 
-  commands: {
-    beepersInBag: function(world) {
-      return !!world.karel.beeperCount;
-    },
-
-    beepersPresent: function(world) {
-      var x = world.karel.x;
-      var y = world.karel.y;
-      var result = false;
-      world.beepers.forEach(function(beeper) {
-        if (beeper.x === x && beeper.y === y) {
-          result = true;
-        }
-      });
-      return result;
-    },
-
-    facingEast: function(world) {
-      return world.karel.direction === 2;
-    },
-
-    facingNorth: function(world) {
-      return world.karel.direction === 1;
-    },
-
-    facingSouth: function(world) {
-      return world.karel.direction === 3;
-    },
-
-    facingWest: function(world) {
-      return world.karel.direction === 0;
-    },
-
-    frontIsBlocked: function(world) {
-      return !this.frontIsClear(world);
-    },
-
-    frontIsClear: function(world) {
-      return world.canMove(world.karel.front(), world.karel.x, world.karel.y);
-    },
-
-    leftIsBlocked: function(world) {
-      return !this.leftIsClear(world);
-    },
-
-    leftIsClear: function(world) {
-      return world.canMove(world.karel.left(), world.karel.x, world.karel.y);
-    },
-
-    move: function(world) {
-      if (world.canMove(world.karel.direction, world.karel.x, world.karel.y)) {
-        world.karel.move();
-      }
-    },
-
-    noBeepersInBag: function(world) {
-      return !this.beepersInBag(world);
-    },
-
-    noBeepersPresent: function(world) {
-      return !this.beepersPresent(world);
-    },
-
-    notFacingEast: function(world) {
-      return !this.facingEast(world);
-    },
-
-    notFacingNorth: function(world) {
-      return !this.facingNorth(world);
-    },
-
-    notFacingSouth: function(world) {
-      return !this.facingSouth(world);
-    },
-
-    notFacingWest: function(world) {
-      return !this.facingWest(world);
-    },
-
-    putBeeper: function(world) {
-      world.putBeeper(world.karel.x, world.karel.y);
-    },
-
-    pickBeeper: function(world) {
-      world.pickBeeper(world.karel.x, world.karel.y);
-    },
-
-    rightIsBlocked: function(world) {
-      return !this.rightIsClear(world);
-    },
-
-    rightIsClear: function(world) {
-      return world.canMove(world.karel.right(), world.karel.x, world.karel.y);
-    },
-
-    turnAround: function(world) {
-      world.karel.turnAround();
-    },
-
-    turnLeft: function(world) {
-      world.karel.turnLeft();
-    },
-
-    turnRight: function(world) {
-      world.karel.turnRight();
-    },
-  },
-
   code: function() {
     return this.editor.doc.getValue();
   },
@@ -206,7 +78,7 @@ var GameObject = {
     if (showSolution) {
       for(var i = 0; i < this.renderers.length; i++) {
         var renderer = this.renderers[i];
-        renderer.solution(snapshot[i].world); // TODO: multi worlds
+        renderer.solution(snapshot[i].world);
       }
     } else if (snapshot) {
       for(var i = 0; i < this.renderers.length; i++) {
@@ -222,6 +94,31 @@ var GameObject = {
     requestAnimationFrame(this.main.bind(this));
   },
 
+  initLevels: function(levels) {
+    var savedLevels = JSON.parse(localStorage.getItem("foobar"));
+    this.levels = levels;
+    this.level = levels[this.levelIndex];
+
+    if (false) { //savedLevel) {
+      this.setCode(savedLevel.code);
+      for(var i = 0; i < this.level.worlds.length; i++) {
+        var renderer = Renderer.initialize();
+        this.renderers.push(renderer);
+        this.worlds.push(World.initialize(savedLevel.world, renderer));
+      }
+    } else {
+      for(var i = 0; i < this.level.worlds.length; i++) {
+        var renderer = Renderer.initialize();
+        this.renderers.push(renderer);
+        this.worlds.push(World.initialize(this.level.worlds[i], renderer));
+      }
+    }
+
+    this.currentSnapshot = this.takeSnapshot();
+
+
+  },
+
   reset: function() {
     this.worlds = [];
     for(var i = 0; i < this.level.worlds.length; i++) {
@@ -234,7 +131,7 @@ var GameObject = {
 
   runCommand: function(command) {
     for(var i = 0; i < this.worlds.length; i++) {
-      var result = this.commands[command](this.worlds[i]);
+      var result = World.actions[command](this.worlds[i]);
     }
 
     if (result === undefined) {
@@ -261,9 +158,10 @@ var GameObject = {
 
   save: function() {
     var value = JSON.stringify({ worlds: this.worlds.map(function(world) { return world.attributes(); }.bind(this)),
-                                 code:  this.code()
+                                 code:  this.code(),
+                                 level: $(".level-select").val()
     });
-    localStorage.setItem("karel-level-1", value);
+    localStorage.setItem("foobar", value);
   },
 
   setLevel: function() {

@@ -125,4 +125,112 @@ var World = {
 
     return noBottomWall && noTopWall;
   },
+
+  actions: {
+    beepersInBag: function(world) {
+      return !!world.karel.beeperCount;
+    },
+
+    beepersPresent: function(world) {
+      var x = world.karel.x;
+      var y = world.karel.y;
+      var result = false;
+      world.beepers.forEach(function(beeper) {
+        if (beeper.x === x && beeper.y === y) {
+          result = true;
+        }
+      });
+      return result;
+    },
+
+    facingEast: function(world) {
+      return world.karel.direction === 2;
+    },
+
+    facingNorth: function(world) {
+      return world.karel.direction === 1;
+    },
+
+    facingSouth: function(world) {
+      return world.karel.direction === 3;
+    },
+
+    facingWest: function(world) {
+      return world.karel.direction === 0;
+    },
+
+    frontIsBlocked: function(world) {
+      return !this.frontIsClear(world);
+    },
+
+    frontIsClear: function(world) {
+      return world.canMove(world.karel.front(), world.karel.x, world.karel.y);
+    },
+
+    leftIsBlocked: function(world) {
+      return !this.leftIsClear(world);
+    },
+
+    leftIsClear: function(world) {
+      return world.canMove(world.karel.left(), world.karel.x, world.karel.y);
+    },
+
+    move: function(world) {
+      if (world.canMove(world.karel.direction, world.karel.x, world.karel.y)) {
+        world.karel.move();
+      }
+    },
+
+    noBeepersInBag: function(world) {
+      return !this.beepersInBag(world);
+    },
+
+    noBeepersPresent: function(world) {
+      return !this.beepersPresent(world);
+    },
+
+    notFacingEast: function(world) {
+      return !this.facingEast(world);
+    },
+
+    notFacingNorth: function(world) {
+      return !this.facingNorth(world);
+    },
+
+    notFacingSouth: function(world) {
+      return !this.facingSouth(world);
+    },
+
+    notFacingWest: function(world) {
+      return !this.facingWest(world);
+    },
+
+    putBeeper: function(world) {
+      world.putBeeper(world.karel.x, world.karel.y);
+    },
+
+    pickBeeper: function(world) {
+      world.pickBeeper(world.karel.x, world.karel.y);
+    },
+
+    rightIsBlocked: function(world) {
+      return !this.rightIsClear(world);
+    },
+
+    rightIsClear: function(world) {
+      return world.canMove(world.karel.right(), world.karel.x, world.karel.y);
+    },
+
+    turnAround: function(world) {
+      world.karel.turnAround();
+    },
+
+    turnLeft: function(world) {
+      world.karel.turnLeft();
+    },
+
+    turnRight: function(world) {
+      world.karel.turnRight();
+    },
+  }
 };
