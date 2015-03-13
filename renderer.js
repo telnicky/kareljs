@@ -9,6 +9,15 @@ var Renderer = {
     return instance;
   },
 
+  remove: function() {
+    $(this.canvas).remove();
+  },
+
+  clear: function() {
+    var context = this.canvas.getContext("2d");
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  },
+
   createCanvas: function() {
     this.canvas = document.createElement("canvas");
     this.canvas.className = "karel-container";
@@ -145,8 +154,7 @@ var Renderer = {
   },
 
   render: function(world, karel) {
-    var context = this.canvas.getContext("2d");
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.clear();
     this.drawLevel(world);
     if (this.karelReady) {
       this.drawKarel(karel);
@@ -154,8 +162,7 @@ var Renderer = {
   },
 
   solution: function(world) {
-    var context = this.canvas.getContext("2d");
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.clear();
     this.drawLevel(world, true);
   }
 };
