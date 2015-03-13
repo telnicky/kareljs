@@ -10,10 +10,15 @@ var GameObject = {
   stateChanged: false,
   worlds: [],
 
-  initialize: function(levels) {
+  initialize: function(levels, cache) {
+    this.initialLevels = levels.levels;
     this.editor = Editor;
     this.currentLevel = levels.currentLevel;
-    this.initLevels(this.fetchLevels() || levels.levels);
+    if (cache) {
+      this.initLevels(this.fetchLevels());
+    } else {
+      this.initLevels(levels.levels);
+    }
     this.buildLevelSelect();
 
     $('.run').click(this.run.bind(this));
@@ -130,9 +135,17 @@ var GameObject = {
   },
 
   reset: function() {
+    for(var i = 0; i < this.renderers.length; i++) {
+      this.renderers[i].remove();
+    }
+
+    this.renderers = [];
     this.worlds = [];
+    this.level.worlds = this.initialLevels[this.currentLevel].worlds;
     for(var i = 0; i < this.level.worlds.length; i++) {
-      this.worlds.push(World.initialize(this.level.worlds[i], this.renderers[i]));
+      var renderer = Renderer.initialize();
+      this.renderers.push(renderer);
+      this.worlds.push(World.initialize(this.level.worlds[i], renderer));
     }
     this.currentSnapshot = this.takeSnapshot();
     this.snapshots = [];
@@ -216,5 +229,5 @@ var GameObject = {
   }
 };
 
-GameObject.initialize(levels);
+GameObject.initialize(levels, false);
 
