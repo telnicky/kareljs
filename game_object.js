@@ -1,5 +1,4 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
-// TODO: frd caching of code
 // TODO: more obvious win state
 // TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
@@ -10,11 +9,11 @@ var GameObject = {
   snapshots: [],
   stateChanged: false,
   worlds: [],
-  levelIndex: 0,
 
   initialize: function(levels) {
     this.editor = Editor;
-    this.initLevels(levels);
+    this.currentLevel = levels.currentLevel;
+    this.initLevels(this.fetchLevels() || levels.levels);
     this.buildLevelSelect();
 
     $('.run').click(this.run.bind(this));
@@ -33,6 +32,7 @@ var GameObject = {
         .text(this.levels[i].name));
     }
     select.change(this.setLevel.bind(this));
+    select.val(this.currentLevel);
   },
 
   checkSolution: function() {
@@ -72,6 +72,25 @@ var GameObject = {
     this.editor.doc.setValue(code);
   },
 
+  fetchLevels: function() {
+    if (this.loadState()) {
+      return this.savedLevels;
+    }
+
+    return false;
+  },
+
+  loadState: function() {
+    var savedLevels = JSON.parse(localStorage.getItem("foobar4"));
+    if (!savedLevels || typeof savedLevels.currentLevel !== "number" || savedLevels.levels === undefined) {
+      return false;
+    }
+
+    this.currentLevel = savedLevels.currentLevel;
+    this.savedLevels = savedLevels.levels;
+    return true;
+  },
+
   main: function() {
     var snapshot = this.currentSnapshot;
     var showSolution = $(".solution").hasClass("active");
@@ -89,34 +108,25 @@ var GameObject = {
 
     var w = window;
     requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
-
-    // Request to do this again ASAP
     requestAnimationFrame(this.main.bind(this));
   },
 
   initLevels: function(levels) {
-    var savedLevels = JSON.parse(localStorage.getItem("foobar"));
     this.levels = levels;
-    this.level = levels[this.levelIndex];
+    this.level = levels[this.currentLevel];
+    this.setCode(this.level.code);
 
-    if (false) { //savedLevel) {
-      this.setCode(savedLevel.code);
-      for(var i = 0; i < this.level.worlds.length; i++) {
-        var renderer = Renderer.initialize();
-        this.renderers.push(renderer);
-        this.worlds.push(World.initialize(savedLevel.world, renderer));
-      }
-    } else {
-      for(var i = 0; i < this.level.worlds.length; i++) {
-        var renderer = Renderer.initialize();
-        this.renderers.push(renderer);
-        this.worlds.push(World.initialize(this.level.worlds[i], renderer));
-      }
+    for(var i = 0; i < this.level.worlds.length; i++) {
+      var renderer = Renderer.initialize();
+      this.renderers.push(renderer);
+      this.worlds.push(World.initialize(this.level.worlds[i], renderer));
     }
 
     this.currentSnapshot = this.takeSnapshot();
+  },
 
-
+  levelIndex: function() {
+    return Number($(".level-select").val());
   },
 
   reset: function() {
@@ -157,17 +167,26 @@ var GameObject = {
   },
 
   save: function() {
-    var value = JSON.stringify({ worlds: this.worlds.map(function(world) { return world.attributes(); }.bind(this)),
-                                 code:  this.code(),
-                                 level: $(".level-select").val()
-    });
-    localStorage.setItem("foobar", value);
+    var value = JSON.stringify(this.serializeLevels());
+    localStorage.setItem("foobar4", value);
+  },
+
+  serializeLevels: function() {
+    this.levels[this.levelIndex()].code = this.code();
+    return { levels: this.levels, currentLevel: this.levelIndex() };
   },
 
   setLevel: function() {
     var index = Number($(".level-select").val());
+    this.currentLevel = index;
     this.level = this.levels[index];
+    this.setCode(this.level.code);
     this.reset();
+  },
+
+  setLevelIndex: function(index) {
+    $(".level-select").val(index);
+    this.setLevel();
   },
 
   solution: function() {
