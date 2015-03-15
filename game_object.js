@@ -11,7 +11,7 @@ var GameObject = {
   worlds: [],
 
   initialize: function(levels, cache) {
-    this.initialLevels = levels.levels;
+    this.initialLevels = $.extend(true, {}, levels.levels);
     this.editor = Editor;
     this.currentLevel = levels.currentLevel;
     if (cache) {
@@ -141,7 +141,7 @@ var GameObject = {
 
     this.renderers = [];
     this.worlds = [];
-    this.level.worlds = this.initialLevels[this.currentLevel].worlds;
+    this.level.worlds = $.extend(true, [], this.initialLevels[this.currentLevel].worlds);
     for(var i = 0; i < this.level.worlds.length; i++) {
       var renderer = Renderer.initialize();
       this.renderers.push(renderer);
@@ -230,4 +230,3 @@ var GameObject = {
 };
 
 GameObject.initialize(levels, false);
-
