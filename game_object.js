@@ -4,9 +4,8 @@
 // TODO: Title / styling, disable run button while running, highlight on error
 // TODO: Highlight on undefined function
 var GameObject = {
-  currentSnapshot: [],
+  currentSnapshots: [],
   renderers: [],
-  snapshots: [],
   stateChanged: false,
   worlds: [],
 
@@ -26,7 +25,7 @@ var GameObject = {
     $('.solution').click(this.solution.bind(this));
 
     this.main();
-    setInterval(this.update.bind(this), 800);
+    setInterval(this.update.bind(this), 500);
   },
 
   buildLevelSelect: function() {
@@ -41,27 +40,27 @@ var GameObject = {
   },
 
   checkSolution: function() {
+    var compare = function(a, b) {
+      return a.x === b.x && a.y === b.y && a.count === b.count;
+    };
+
     for(var i = 0; i < this.worlds.length; i++) {
       var world = this.worlds[i];
       var beepers = world.beepers;
       var solution = world.solution;
-      var compare = function(a, b) {
-        return a.x === b.x && a.y === b.y && a.count === b.count;
-      };
 
       if (beepers.length !== solution.length) {
         return false;
       }
 
-      for(var i = 0; i < beepers.length; i++) {
-        for(var j = 0; j < solution.length; j++) {
-          if (!compare(beepers[i], solution[j])) {
+      for(var j = 0; j < beepers.length; j++) {
+        for(var k = 0; k < solution.length; k++) {
+          if (!compare(beepers[j], solution[k])) {
             return false;
           }
         }
       }
     }
-
     return true;
   },
 
@@ -85,6 +84,14 @@ var GameObject = {
     return false;
   },
 
+  hasSnapshots: function() {
+    for(var i = 0; i < this.worlds.length; i ++) {
+      if (this.worlds[i].snapshots.length > 0) {
+        return true;
+      }
+    }
+  },
+
   loadState: function() {
     var savedLevels = JSON.parse(localStorage.getItem("foobar4"));
     if (!savedLevels || typeof savedLevels.currentLevel !== "number" || savedLevels.levels === undefined) {
@@ -97,17 +104,20 @@ var GameObject = {
   },
 
   main: function() {
-    var snapshot = this.currentSnapshot;
+    var snapshots = this.currentSnapshots;
     var showSolution = $(".solution").hasClass("active");
     if (showSolution) {
       for(var i = 0; i < this.renderers.length; i++) {
         var renderer = this.renderers[i];
-        renderer.solution(snapshot[i].world);
+        renderer.solution(this.worlds[i]);
       }
-    } else if (snapshot) {
+    } else if (snapshots.length > 0) {
       for(var i = 0; i < this.renderers.length; i++) {
         var renderer = this.renderers[i];
-        renderer.render(snapshot[i].world, snapshot[i].world.karel);
+        if (snapshots[i]) {
+          var world = snapshots[i];
+          renderer.render(world, world.karel);
+        }
       }
     }
 
@@ -121,13 +131,15 @@ var GameObject = {
     this.level = levels[this.currentLevel];
     this.setCode(this.level.code);
 
+    // TODO: abbstract to method, used in reset
     for(var i = 0; i < this.level.worlds.length; i++) {
       var renderer = Renderer.initialize();
+      var world = World.initialize(this.level.worlds[i], renderer);
       this.renderers.push(renderer);
-      this.worlds.push(World.initialize(this.level.worlds[i], renderer));
+      this.worlds.push(world);
+      world.takeSnapshot();
     }
-
-    this.currentSnapshot = this.takeSnapshot();
+    this.setCurrentSnapshots();
   },
 
   levelIndex: function() {
@@ -141,42 +153,30 @@ var GameObject = {
 
     this.renderers = [];
     this.worlds = [];
+    this.setCurrentSnapshot = [];
     this.level.worlds = $.extend(true, [], this.initialLevels[this.currentLevel].worlds);
     for(var i = 0; i < this.level.worlds.length; i++) {
       var renderer = Renderer.initialize();
+      var world = World.initialize(this.level.worlds[i], renderer);
       this.renderers.push(renderer);
-      this.worlds.push(World.initialize(this.level.worlds[i], renderer));
+      this.worlds.push(world);
+      world.takeSnapshot();
     }
-    this.currentSnapshot = this.takeSnapshot();
-    this.snapshots = [];
+    this.setCurrentSnapshots();
     $(".run").html("run");
   },
 
-  runCommand: function(command) {
-    for(var i = 0; i < this.worlds.length; i++) {
-      var result = World.actions[command](this.worlds[i]);
-    }
-
-    if (result === undefined) {
-      // likely something changed because it is not a predicate function
-      this.snapshots.push(this.takeSnapshot());
-    }
-
-    return result;
-  },
-
   run: function() {
-    var commands = this.worlds[0].karel.commands();
-    for(var i = 0; i < commands.length; i++) {
-      eval('var ' + commands[i] + ' = function() { return this.runCommand("' + commands[i] + '"); }.bind(this);');
+    var code = this.code();
+    for(var i = 0; i < this.worlds.length; i++) {
+      try {
+        this.worlds[i].executeCode(code);
+      } catch(err) {
+        console.log(err);
+        this.reset();
+      }
     }
 
-    try {
-      eval(this.code());
-    } catch(err) {
-      console.log(err);
-      this.reset();
-    }
   },
 
   save: function() {
@@ -187,6 +187,15 @@ var GameObject = {
   serializeLevels: function() {
     this.levels[this.levelIndex()].code = this.code();
     return { levels: this.levels, currentLevel: this.levelIndex() };
+  },
+
+  setCurrentSnapshots: function() {
+    this.currentSnapshots = this.worlds.map(function(world) {
+      if (world.snapshots.length > 0) {
+        return world.snapshots.shift();
+      }
+      return false;
+    });
   },
 
   setLevel: function() {
@@ -206,15 +215,9 @@ var GameObject = {
     $(".solution").toggleClass("active");
   },
 
-  takeSnapshot: function(index) {
-    return this.worlds.map(function(world) {
-      return { world: $.extend(true, {}, world) };
-    });
-  },
-
   update: function() {
-    if (this.snapshots.length > 0) {
-      this.currentSnapshot = this.snapshots.shift();
+    if (this.hasSnapshots()) {
+      this.setCurrentSnapshots();
       this.stateChanged = true;
     } else if(this.stateChanged) {
       this.stateChanged = false;

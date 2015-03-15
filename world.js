@@ -1,5 +1,6 @@
 var World = {
   beepers: [],
+  snapshots: [],
   solution: [],
   walls: "",
 
@@ -124,6 +125,29 @@ var World = {
     var noTopWall = (nextWall & this.renderer.topWall) == 0;
 
     return noBottomWall && noTopWall;
+  },
+
+  executeCommand: function(command) {
+    var result = this.actions[command](this);
+
+    if (result === undefined) {
+      // likely something changed because it is not a predicate function
+      this.takeSnapshot();
+    }
+
+    return result;
+  },
+
+  executeCode: function(code) {
+    var commands = this.karel.commands();
+    for(var i = 0; i < commands.length; i++) {
+      eval('var ' + commands[i] + ' = function() { return this.executeCommand("' + commands[i] + '"); }.bind(this);');
+    }
+    eval(code);
+  },
+
+  takeSnapshot: function() {
+    this.snapshots.push($.extend(true, {}, this.attributes()));
   },
 
   actions: {
