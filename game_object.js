@@ -178,11 +178,13 @@ var GameObject = {
 
   run: function() {
     var code = this.code();
+    this.setError("");
     for(var i = 0; i < this.worlds.length; i++) {
       try {
         this.worlds[i].executeCode(code);
       } catch(err) {
         console.log(err);
+        this.setError(err);
         this.reset();
       }
     }
@@ -206,6 +208,10 @@ var GameObject = {
       }
       return false;
     });
+  },
+
+  setError: function(error) {
+    $('.error').text(error);
   },
 
   setLevel: function() {
