@@ -230,11 +230,17 @@ var World = {
     },
 
     putBeeper: function(world) {
-      world.putBeeper(world.karel.x, world.karel.y);
+      if (world.karel.beeperCount > 0) {
+        world.karel.beeperCount--;
+        world.putBeeper(world.karel.x, world.karel.y);
+      }
     },
 
     pickBeeper: function(world) {
-      world.pickBeeper(world.karel.x, world.karel.y);
+      if (this.beepersPresent(world)) {
+        world.karel.beeperCount++;
+        world.pickBeeper(world.karel.x, world.karel.y);
+      }
     },
 
     rightIsBlocked: function(world) {

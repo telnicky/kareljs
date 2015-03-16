@@ -48,19 +48,26 @@ var GameObject = {
       var world = this.worlds[i];
       var beepers = world.beepers;
       var solution = world.solution;
+      var found = false;
 
       if (beepers.length !== solution.length) {
         return false;
       }
 
       for(var j = 0; j < beepers.length; j++) {
+        found = false;
         for(var k = 0; k < solution.length; k++) {
-          if (!compare(beepers[j], solution[k])) {
-            return false;
+          if (compare(beepers[j], solution[k])) {
+            found = true;
           }
+        }
+
+        if (!found) {
+          return false;
         }
       }
     }
+
     return true;
   },
 

@@ -12,7 +12,7 @@ var levels = {
           "0,0,0,0,0,0,0",
         beepers: [{ x: 5, y: 2, count: 1 }],
         solution: [{ x : 2, y: 1, count: 1 }],
-        karel: { x: 2, y: 1, direction: 0, isSuper: false }
+        karel: { x: 2, y: 1, direction: 0, isSuper: false, beeperCount: 0 }
       },
     ],
   },
@@ -22,9 +22,9 @@ var levels = {
     worlds: [
       {
         walls: "0,0,0,0,0,0,0\n" +
-               "8,12,0,9,8,8,8",
+               "8,12,0,9,12,0,9",
         beepers: [],
-        solution: [{ x : 2, y: 1, count: 1 }],
+        solution: [{ x: 2, y: 1, count: 1 }, { x: 5, y: 1, count: 1 }],
         karel: { x: 0, y: 0, direction: 0, isSuper: true }
       },
       {

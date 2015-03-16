@@ -11,7 +11,10 @@ var Karel = {
     karel.y = attrs.y;
     karel.isSuper = !!attrs.isSuper;
     karel.direction = attrs.direction;
-    karel.beeperCount = attrs.beeperCount;
+
+    if (attrs.beeperCount !== undefined) {
+      karel.beeperCount = attrs.beeperCount;
+    }
 
     return karel;
   },
