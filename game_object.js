@@ -1,4 +1,5 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
+// TODO: Hint for level
 // TODO: more obvious win state
 // TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
