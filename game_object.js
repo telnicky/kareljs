@@ -4,6 +4,8 @@
 // TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
 // TODO: Highlight on undefined function
+
+var CACHE_KEY = "karel-js-1";
 var GameObject = {
   currentSnapshots: [],
   renderers: [],
@@ -15,7 +17,7 @@ var GameObject = {
     this.editor = Editor;
     this.currentLevel = levels.currentLevel;
     if (cache) {
-      this.initLevels(this.fetchLevels());
+      this.initLevels(this.fetchLevels() || levels.levels);
     } else {
       this.initLevels(levels.levels);
     }
@@ -101,7 +103,7 @@ var GameObject = {
   },
 
   loadState: function() {
-    var savedLevels = JSON.parse(localStorage.getItem("foobar4"));
+    var savedLevels = JSON.parse(localStorage.getItem(CACHE_KEY));
     if (!savedLevels || typeof savedLevels.currentLevel !== "number" || savedLevels.levels === undefined) {
       return false;
     }
@@ -189,7 +191,7 @@ var GameObject = {
 
   save: function() {
     var value = JSON.stringify(this.serializeLevels());
-    localStorage.setItem("foobar4", value);
+    localStorage.setItem(CACHE_KEY, value);
   },
 
   serializeLevels: function() {
@@ -240,4 +242,4 @@ var GameObject = {
   }
 };
 
-GameObject.initialize(levels, false);
+GameObject.initialize(levels, true);
