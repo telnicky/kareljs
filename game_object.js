@@ -1,11 +1,9 @@
 // Super Karel http://web.stanford.edu/class/cs106a/materials/midterm-1-reference.pdf
 // TODO: Hint for level
 // TODO: more obvious win state
-// TODO: Description of commands
 // TODO: Title / styling, disable run button while running, highlight on error
-// TODO: Highlight on undefined function
 
-var CACHE_KEY = "karel-js-1";
+var CACHE_KEY = "karel-js-2";
 var GameObject = {
   currentSnapshots: [],
   renderers: [],
@@ -26,6 +24,7 @@ var GameObject = {
     $('.run').click(this.run.bind(this));
     $('.reset').click(this.reset.bind(this));
     $('.solution').click(this.solution.bind(this));
+    $('.help').click(this.help.bind(this));
 
     this.main();
     setInterval(this.update.bind(this), 500);
@@ -102,6 +101,10 @@ var GameObject = {
     }
   },
 
+  help: function() {
+    $(".help-container").toggle();
+  },
+
   loadState: function() {
     var savedLevels = JSON.parse(localStorage.getItem(CACHE_KEY));
     if (!savedLevels || typeof savedLevels.currentLevel !== "number" || savedLevels.levels === undefined) {
@@ -149,6 +152,7 @@ var GameObject = {
       this.worlds.push(world);
       world.takeSnapshot();
     }
+    this.setHelpCommands();
     this.setCurrentSnapshots();
   },
 
@@ -214,12 +218,24 @@ var GameObject = {
     $('.error').text(error);
   },
 
+  setHelpCommands: function() {
+    var commands = this.worlds[0].karel.commands();
+    var commandsHtml = "";
+    for(var i = 0; i < commands.length; i++) {
+      commandsHtml += "<li>" + commands[i] + "()</li>";
+    }
+
+    $(".help-commands").html(commandsHtml);
+    $(".beeper-count").text(this.worlds[0].karel.beeperCount);
+  },
+
   setLevel: function() {
     var index = Number($(".level-select").val());
     this.currentLevel = index;
     this.level = this.levels[index];
     this.setCode(this.level.code);
     this.reset();
+    this.setHelpCommands();
   },
 
   setLevelIndex: function(index) {

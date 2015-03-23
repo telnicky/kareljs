@@ -34,7 +34,7 @@ var levels = {
           { x: 1, y: 2, count: 1 },
           { x: 3, y: 2, count: 1 },
         ],
-        karel: { x: 0, y: 0, direction: 0, isSuper: true }
+        karel: { x: 0, y: 0, direction: 0, isSuper: false }
     }],
   },
   {
@@ -191,7 +191,7 @@ var levels = {
       solution: [
         { x: 8, y: 6, count: 21 },
       ],
-      karel: { x: 0, y: 6, direction: 0, isSuper: true }
+      karel: { x: 0, y: 6, direction: 0, isSuper: true, beeperCount: 0 }
     }],
   }]
 };
