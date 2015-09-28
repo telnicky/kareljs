@@ -29,7 +29,7 @@ var Renderer = {
     this.karelImage.onload = function () {
       this.karelReady = true;
     }.bind(this);
-    this.karelImage.src = "images/karel.png";
+    this.karelImage.src = "images/karl.png";
   },
 
   drawLevel: function(world, solution) {
