@@ -1,0 +1,6 @@
+1. Morning Newspaper - Intro to karel, the idea is to learn #move, #turnLeft, #pickBeeper, #putBeeper
+2. Checkerboard - More practice for above, emphasize functions with for loops and passing variables
+3. Pot Holes - Learn about boolean expressions, if statements, and super karel's commands.
+4. Double the Beepers - Learn about while loops
+5. Midpoint - Hard difficulty, need to use beepers for counting
+6. Maze - Problem solving, can do right hand rule in 8 lines
