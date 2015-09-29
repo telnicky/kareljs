@@ -86,7 +86,7 @@ var levels = {
         karel: { x: 0, y: 0, direction: 0, isSuper: true }
       },
       {
-        walls: "0,0,0,0,0,0,0",
+        walls: "0,0,0,0,0",
         beepers: [],
         solution: [{ x : 2, y: 0, count: 1 }],
         karel: { x: 0, y: 0, direction: 0, isSuper: true }
