@@ -3,7 +3,7 @@
 // TODO: more obvious win state
 // TODO: Title / styling, disable run button while running, highlight on error
 
-var CACHE_KEY = "karel-js-4";
+var CACHE_KEY = "karel-js-6";
 var GameObject = {
   currentSnapshots: [],
   renderers: [],
