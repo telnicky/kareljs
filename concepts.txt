@@ -4,3 +4,66 @@
 4. Double the Beepers - Learn about while loops
 5. Midpoint - Hard difficulty, need to use beepers for counting
 6. Maze - Problem solving, can do right hand rule in 8 lines
+
+commands
+functions
+if
+while
+for
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+while(noBeepersPresent()) {
+  if(rightIsClear()) {
+    turnRight();
+    move();
+  } else {
+    turnLeft();
+  }
+}
+
+pickBeeper();
